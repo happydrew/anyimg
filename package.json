@@ -1,0 +1,52 @@
+{
+  "name": "anyimg",
+  "author": "Drew Grant",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "next build",
+    "dev": "next -p 80",
+    "start": "next start",
+    "postbuild": "next-sitemap --config next-sitemap.config.mjs"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@fingerprintjs/fingerprintjs": "^4.6.1",
+    "@marsidev/react-turnstile": "^0.5.3",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/material": "^6.1.8",
+    "@nextui-org/react": "^2.4.8",
+    "@supabase/supabase-js": "^2.39.6",
+    "clsx": "^2.0.0",
+    "framer-motion": "^11.0.0",
+    "idb": "^8.0.2",
+    "lucide-react": "^0.456.0",
+    "next": "^14.1.4",
+    "next-sitemap": "^4.2.3",
+    "nextra": "3.1.1",
+    "nextra-theme-docs": "3.1.1",
+    "nodemailer": "^6.10.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^5.3.0",
+    "react-rough-notation": "^1.0.5",
+    "react-router-dom": "^6.26.2",
+    "replicate": "^1.0.1",
+    "sharp": "^0.33.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@svgr/webpack": "^8.0.1",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.23",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.33",
+    "proxy-agent": "^6.5.0",
+    "tailwindcss": "^3.4.1"
+  },
+  "browserslist": [
+    ">= .25%",
+    "not dead"
+  ]
+}
