@@ -48,14 +48,15 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
     </Script> */}
 
     {/* Google tag (gtag.js) */}
-    <Script async src="https://www.googletagmanager.com/gtag/js?id=G-NXCK9TQMKX"></Script>
+
+    <Script async src="https://www.googletagmanager.com/gtag/js?id=G-QMS8MYP86F"></Script>
     <Script>
       {`
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
-      gtag('config', 'G-NXCK9TQMKX');
+      gtag('config', 'G-QMS8MYP86F');
       `}
     </Script>
 
