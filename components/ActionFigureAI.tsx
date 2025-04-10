@@ -22,7 +22,7 @@ type TaskStatus = 'IDLE' | 'GENERATING' | 'SUCCESS' | 'FAILED';
 
 const MAX_FREE = 3;
 
-const CHECK_STATUS_INTERVAL = 6000;
+const CHECK_STATUS_INTERVAL = 60000;
 
 const ActionFigureAI = () => {
     // 使用AuthContext
