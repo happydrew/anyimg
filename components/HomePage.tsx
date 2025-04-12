@@ -8,6 +8,7 @@ import AdModal from './AdModal';
 import ImageViewerModal from './ImageViewerModal';
 import TurnstileModal from './TurnstileModal';
 import ImageComparisonCard from './ImageComparisonCard';
+import { FREE_MAX_CREDITS } from '@/config';
 
 // 定义历史记录类型
 interface HistoryItem {
@@ -28,7 +29,6 @@ interface Tool {
     isHot: boolean;
 }
 
-const MAX_FREE = 3;
 const MAX_IMAGES = 5;
 const FREE_MAX_IMAGES = 1;
 
@@ -136,10 +136,10 @@ const HomePage = () => {
         if (!user) {
             checkFreeUsage().then((freeUsage) => {
                 console.log('Free usage:', freeUsage);
-                setFreeCredits(MAX_FREE - freeUsage);
+                setFreeCredits(FREE_MAX_CREDITS - freeUsage);
             }).catch((error) => {
                 console.error('Failed to check usage:', error);
-                setFreeCredits(MAX_FREE);
+                setFreeCredits(FREE_MAX_CREDITS);
             });
         }
     }, [user]);

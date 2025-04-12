@@ -8,6 +8,7 @@ import AdModal from './AdModal';
 import ImageViewerModal from './ImageViewerModal';
 import TurnstileModal from './TurnstileModal';
 import ImageComparisonCard from './ImageComparisonCard';
+import { FREE_MAX_CREDITS } from '@/config';
 
 // 定义历史记录类型
 interface HistoryItem {
@@ -18,8 +19,6 @@ interface HistoryItem {
     accessories?: string;
 }
 
-const MAX_IMAGES = 1;
-const FREE_MAX_IMAGES = 1;
 
 const CHECK_STATUS_INTERVAL = 60000;
 
@@ -146,10 +145,10 @@ following authentic retail action figure design.`
         if (!user) {
             checkFreeUsage().then((freeUsage) => {
                 console.log('Free usage:', freeUsage);
-                setFreeCredits(MAX_IMAGES - freeUsage);
+                setFreeCredits(FREE_MAX_CREDITS - freeUsage);
             }).catch((error) => {
                 console.error('Failed to check usage:', error);
-                setFreeCredits(MAX_IMAGES);
+                setFreeCredits(FREE_MAX_CREDITS);
             });
         }
     }, [user]);
