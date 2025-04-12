@@ -20,8 +20,8 @@ export default function AuthNav() {
                     color="primary"
                     variant="flat"
                     onClick={() => {
-                        console.log(`Clicking sign in button, current window.location.origin is: ${window.location.origin}`)
-                        setLoginModalRedirectTo(window.location.origin)
+                        console.log(`Clicking sign in button, current window.location.href is: ${window.location.href}`)
+                        setLoginModalRedirectTo(window.location.href)
                         setIsLoginModalOpen(true)
                     }}
                     size="sm"

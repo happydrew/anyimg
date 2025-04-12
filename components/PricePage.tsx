@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { Button, Card, CardBody, CardFooter, CardHeader, Spinner } from '@nextui-org/react';
+import { Button, Card, CardBody, CardFooter, CardHeader, Spinner, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { FaCheckCircle, FaCoins, FaStar } from 'react-icons/fa';
 import { useRouter } from 'next/router';
@@ -53,6 +53,7 @@ export default function PricePage() {
     const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
 
     const handlePurchase = async (planId: string) => {
         if (!user) {
@@ -65,8 +66,9 @@ export default function PricePage() {
         setIsProcessing(true);
         setErrorMessage(null);
 
-        // TEMPORARY: Redirect to free credits page while payment integration is pending
-        router.push('/temp-purchase');
+        // Show purchase modal instead of redirecting
+        setIsPurchaseModalOpen(true);
+        setIsProcessing(false);
         return; // Early return to skip the regular payment flow
 
         try {
@@ -244,6 +246,45 @@ export default function PricePage() {
                     </Button>
                 </div>
             </div>
+
+            {/* Purchase Information Modal */}
+            <Modal
+                isOpen={isPurchaseModalOpen}
+                onClose={() => setIsPurchaseModalOpen(false)}
+                size="lg"
+            >
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        <h3 className="text-xl font-bold text-[#1c4c3b]">Purchase Information</h3>
+                    </ModalHeader>
+                    <ModalBody>
+                        <div className="p-4 text-[#506a3a]">
+                            <p className="mb-4">Thank you for your support of AnyImg!</p>
+                            <p className="mb-4">Our payment system is currently under development. Please contact <span className="font-bold">zhugetd@gmail.com</span> to purchase credits.</p>
+                            <p className="mb-4">Please include in your email:</p>
+                            <ul className="list-disc pl-5 mb-4">
+                                <li>The account to be recharged</li>
+                                <li>The plan you wish to purchase</li>
+                            </ul>
+                            <p className="mb-4">We will credit your account within 1 hour after receiving your email.</p>
+                            <p className="font-medium">Payment methods we currently support:</p>
+                            <ul className="list-disc pl-5">
+                                <li>PayPal</li>
+                                <li>Alipay</li>
+                                <li>WeChat Pay</li>
+                            </ul>
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            className="bg-gradient-to-r from-[#1c4c3b] to-[#2a6854] text-white"
+                            onClick={() => setIsPurchaseModalOpen(false)}
+                        >
+                            Got it
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
         </div>
     );
 } 

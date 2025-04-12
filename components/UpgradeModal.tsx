@@ -61,7 +61,7 @@ const UpgradeModal = ({ onClose }: { onClose: () => void }) => {
                             <button
                                 onClick={() => {
                                     console.log(`current is in upgrade modal, redirecting to login page, window.location.origin is: ${window.location.origin}`);
-                                    setLoginModalRedirectTo(`${window.location.origin}/temp-purchase`)
+                                    setLoginModalRedirectTo(`${window.location.origin}/pricing`)
                                     setIsLoginModalOpen(true); // 打开登录模态框
                                     onClose(); // 关闭升级模态框
                                 }}
