@@ -16,4 +16,4 @@ const GIVE_FREE_CREDITS_URL = `${backEnd}/api/payment/giveFreeCredits`;
 const SUPABASE_URL = 'https://xoirjktingupbntqquex.supabase.co'
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhvaXJqa3Rpbmd1cGJudHFxdWV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk4Njc1ODMsImV4cCI6MjA0NTQ0MzU4M30.Dw_Vz2J43sLra9PIg_mZu5pmxqsifXZ1q19AhOlOzEM'
 
-const FREE_MAX_CREDITS = 1;
+const FREE_MAX_CREDITS = 3;
