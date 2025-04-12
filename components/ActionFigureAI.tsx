@@ -11,27 +11,40 @@ import ImageComparisonCard from './ImageComparisonCard';
 
 // 定义历史记录类型
 interface HistoryItem {
-    originalImage: string;
+    originalImages: string[];
     actionFigureImage: string;
-    timestamp: number;
-    prompt?: string;
+    title?: string;
+    tagline?: string;
+    accessories?: string;
 }
 
-// 添加任务状态类型定义
-type TaskStatus = 'IDLE' | 'GENERATING' | 'SUCCESS' | 'FAILED';
-
-const MAX_FREE = 3;
+const MAX_IMAGES = 1;
+const FREE_MAX_IMAGES = 1;
 
 const CHECK_STATUS_INTERVAL = 60000;
+
+// 保留waitingTips相关代码作为常量
+const waitingTips = [
+    "Creating your Action Figure transformation, do not refresh the page",
+    "This may take a few minutes depending on image size",
+    "Our AI is carefully crafting your collectible transformation",
+    "Processing time varies based on server load",
+    "Please wait while we work our magic..."
+];
 
 const ActionFigureAI = () => {
     // 使用AuthContext
     const { user, credits, setIsLoginModalOpen, setLoginModalRedirectTo, getAccessToken } = useAuth();
 
-    const [prompt, setPrompt] = useState('');
+    // 将原来的prompt替换为三个新的输入
+    const [title, setTitle] = useState('');
+    const [tagline, setTagline] = useState('');
+    const [accessories, setAccessories] = useState('');
+
+    // 保留现有状态
     const [selectedImage, setSelectedImage] = useState('');
     const [showImageViewer, setShowImageViewer] = useState(false);
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+    const [uploadedImages, setUploadedImages] = useState<string[]>([]);
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [generationError, setGenerationError] = useState('');
@@ -47,53 +60,85 @@ const ActionFigureAI = () => {
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
 
-    // 任务相关状态
-    const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
-    const [taskStatus, setTaskStatus] = useState<TaskStatus>('IDLE');
-    const [pollingCount, setPollingCount] = useState(0);
-    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    // 示例提示词
-    const inspirationExamples = [
-        {
-            original: "/examples/original-1.jpg",
-            actionFigure: "/examples/action-figure-1.png",
-            prompt: 'Transform the uploaded photo into a full-body action figure toy rendered in a clean, cartoonish 3D style with an original blister pack packaging featuring bold blue and yellow accents, the title "CR7 Strikeforce" and the tagline "Unstoppable on Any Field!", including detailed accessories such as a golden soccer ball, interchangeable cleats, a Portugal jersey, a trophy stand, and signature celebration arms.'
-        },
-        {
-            original: "/examples/original-2.jpg",
-            actionFigure: "/examples/action-figure-2.png",
-            prompt: 'Transform the uploaded photo into a full-body action figure toy rendered in a clean, cartoonish 3D style, presented in an original blister pack packaging with bold navy blue and vibrant yellow accents. Title it “BEZOS PRIME COMMANDER” and use the tagline “Delivering the Future!”. Include detailed accessories such as a miniature Blue Origin-style rocket, a high-tech drone, a “Billionaire Blaster” handheld device, and a futuristic tablet. Emphasize a heroic pose and an overall playful, collector’s-item aesthetic.'
-        },
-        {
-            original: "/examples/original-3.jpg",
-            actionFigure: "/examples/action-figure-3.png",
-            prompt: 'Transform the uploaded photo into a full-body action figure toy rendered in a clean, cartoonish 3D style with an original blister pack packaging featuring bold blue and yellow accents, the title "TECHNOKING ELON" and the tagline "One Tweet Away from Mars!", including detailed accessories such as a miniature Cybertruck, a Boring Company flamethrower, a Mars surface map, a Tesla battery pack, and an "X" control panel. Pose the figure in a confident stance wearing a black tuxedo, and maintain an overall playful, collectible-aesthetic design.'
-        },
-        {
-            original: "/examples/original-4.jpg",
-            actionFigure: "/examples/action-figure-4.png",
-            prompt: 'Transform the uploaded photo into a full-body action figure toy rendered in a clean, cartoonish 3D style with an original blister pack packaging featuring teal and magenta accents. Use the title "GATES OF GENIUS" and the tagline "CODE. CURE. CONQUER.". Include detailed accessories such as a pair of iconic glasses, a vintage Windows monitor labeled "Windows 95", a syringe representing medical research, a philanthropic donation jar, and a chalkboard reading "How to Solve Global Warming". The figure should be posed wearing a classic dark suit with a friendly, visionary expression, maintaining a collectible, playful aesthetic overall.'
-        }
-    ]
-
-    const examplePrompts = inspirationExamples.map(example => example.prompt);
-
-    // 添加提示信息数组
-    const waitingTips = [
-        "Creating your Action Figure transformation, do not refresh the page",
-        "This may take a few minutes depending on image size",
-        "Our AI is carefully crafting your collectible transformation",
-        "Processing time varies based on server load",
-        "Please wait while we work our magic..."
-    ];
-
+    // 将waitingTips相关状态移到组件内部
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
     const tipIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+    const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // 修改示例，添加title、tagline和accessories字段
+    const inspirationExamples = [
+        {
+            original: "/examples/action-figure/original-1.jpg",
+            actionFigure: "/examples/action-figure/action-figure-1.png",
+            title: "CR7 STRIKEFORCE",
+            tagline: "Unstoppable on Any Field!",
+            accessories: "a golden soccer ball, interchangeable cleats, a Portugal jersey, a trophy stand, and signature celebration arms"
+        },
+        {
+            original: "/examples/action-figure/original-2.jpg",
+            actionFigure: "/examples/action-figure/action-figure-2.png",
+            title: "BEZOS PRIME COMMANDER",
+            tagline: "Delivering the Future!",
+            accessories: "a miniature Blue Origin-style rocket, a high-tech drone, a 'Billionaire Blaster' handheld device, and a futuristic tablet"
+        },
+        {
+            original: "/examples/action-figure/original-3.jpg",
+            actionFigure: "/examples/action-figure/action-figure-3.png",
+            title: "TECHNOKING ELON",
+            tagline: "One Tweet Away from Mars!",
+            accessories: "a miniature Cybertruck, a Boring Company flamethrower, a Mars surface map, a Tesla battery pack, and an 'X' control panel"
+        },
+        {
+            original: "/examples/action-figure/original-4.jpg",
+            actionFigure: "/examples/action-figure/action-figure-4.png",
+            title: "GATES OF GENIUS",
+            tagline: "CODE. CURE. CONQUER.",
+            accessories: "a pair of iconic glasses, a vintage Windows monitor labeled 'Windows 95', a syringe representing medical research, a philanthropic donation jar, and a chalkboard reading 'How to Solve Global Warming'"
+        }
+    ]
+
+    // 创建提示词模板生成函数
+    const generatePromptFromInputs = () => {
+
+        return `Transform the uploaded photo into a full-body action figure toy that captures the key facial and body features of the original person 
+with a semi-realistic 3D toy style. Render the figure using realistic detailing and proportions while maintaining a collectible toy look with smooth, 
+plastic textures. Display the figure in a photorealistic, retail-grade 3D style with meticulously detailed, 
+high-quality blister pack packaging that mimics real collectible products, featuring the title "${title}" and the tagline "${tagline}". 
+Additionally, the packaging must include the following accessories: ${accessories}. 
+Each accessory should be rendered exactly once and positioned clearly on either the left or right side of the figure, without overlapping it, 
+following authentic retail action figure design.`
+
+        return `Transform the uploaded photo into a full-body action figure toy that balances a 
+        playful 3D cartoonish style with subtle realistic details, 
+        ensuring that key facial and body characteristics from the original image remain easily recognizable. 
+        Render the figure with toy-like proportions and a clear 3D form, 
+        so it looks like a collectible toy rather than a hyper-realistic human, 
+        yet preserves the essence of the original person. 
+        Display the figure in a photorealistic, retail-grade 3D style with meticulously detailed, 
+        high-quality blister pack packaging that mimics real collectible products and 
+        shows the title "${title}" and the tagline "${tagline}". Additionally, 
+        the blister pack must include the following accessories: ${accessories}. 
+        Each accessory should be rendered exactly once, positioned clearly and separately on either 
+        the left or right side of the figure, without overlapping it or the figure, 
+        following authentic retail action figure design.`
+
+        // 第二种提示词
+        return `Transform the uploaded photo into a full-body action figure toy with a stylized, 
+        fun 3D cartoonish appearance and toy-like proportions that resemble a collectible toy rather than a hyperrealistic human. 
+        Render the figure in a photorealistic, retail-grade 3D style with meticulously detailed, high-quality blister pack packaging, 
+        similar to authentic toy products. 
+        The packaging displays the title "${title}" and the tagline "${tagline}" clearly. 
+        Additionally, the blister pack must include the following accessories: ${accessories}. 
+        Each accessory should be rendered exactly once, positioned clearly and separately on either the left or right side of the figure, 
+        without overlapping it or the figure, in line with genuine retail action figure design.`
+
+
+    };
+
     // 初始化时随机选择一个示例
     useEffect(() => {
-        handleRandomPrompt();
+        handleRandomInputs();
     }, [])
 
     // 只在用户未登录时才检查免费使用次数
@@ -101,24 +146,19 @@ const ActionFigureAI = () => {
         if (!user) {
             checkFreeUsage().then((freeUsage) => {
                 console.log('Free usage:', freeUsage);
-                setFreeCredits(MAX_FREE - freeUsage);
+                setFreeCredits(MAX_IMAGES - freeUsage);
             }).catch((error) => {
                 console.error('Failed to check usage:', error);
-                setFreeCredits(MAX_FREE);
+                setFreeCredits(MAX_IMAGES);
             });
         }
     }, [user]);
-
-    useEffect(() => {
-        if (localStorage.getItem('currentTaskId')) {
-            setCurrentTaskId(localStorage.getItem('currentTaskId'));
-        }
-    }, []);
 
     // 加载历史记录
     useEffect(() => {
         const savedHistory = localStorage.getItem('actionFigureImageHistory');
         if (savedHistory) {
+            console.log('savedHistory:', savedHistory);
             try {
                 setHistory(JSON.parse(savedHistory));
             } catch (e) {
@@ -145,15 +185,18 @@ const ActionFigureAI = () => {
 
     // 在页面加载时恢复任务状态
     useEffect(() => {
-        const savedTaskId = localStorage.getItem('currentTaskId');
-        const savedUploadedImage = localStorage.getItem('pendingUploadedImage');
+        const savedTaskId = localStorage.getItem('pendingTaskId');
+        const savedUploadedImages = localStorage.getItem('pendingUploadedImages');
+        const savedSize = localStorage.getItem('pendingSize');
 
-        if (savedTaskId && savedUploadedImage) {
-            setCurrentTaskId(savedTaskId);
-            setUploadedImage(savedUploadedImage);
-            setTaskStatus('GENERATING');
-            setIsGenerating(true);
-            startPollingTaskStatus(savedTaskId);
+        if (savedTaskId && savedUploadedImages) {
+            try {
+                setUploadedImages(JSON.parse(savedUploadedImages));
+                setIsGenerating(true);
+                startPollingTaskStatus(savedTaskId);
+            } catch (e) {
+                console.error('Failed to parse saved uploaded images:', e);
+            }
         }
     }, []);
 
@@ -187,29 +230,41 @@ const ActionFigureAI = () => {
         };
     }, [isGenerating]);
 
-    const handleRandomPrompt = () => {
-        const randomIndex = Math.floor(Math.random() * examplePrompts.length);
-        setPrompt(examplePrompts[randomIndex]);
+    const handleRandomInputs = () => {
+        const randomIndex = Math.floor(Math.random() * inspirationExamples.length);
+        const example = inspirationExamples[randomIndex];
+        setTitle(example.title);
+        setTagline(example.tagline);
+        setAccessories(example.accessories);
     };
 
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         setImageUploading(true);
         try {
-            const file = e.target.files?.[0];
-            if (!file) return;
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+
+            // 始终只处理一张图片
+            const file = files[0];
 
             // 检查文件类型
             if (!file.type.startsWith('image/')) {
-                alert('Please upload an image file');
+                alert('Please upload image files only');
+                setImageUploading(false);
                 return;
             }
 
-            // 检查文件大小 (限制为 5MB)
+            // 检查文件大小（限制为5MB）
             if (file.size > 5 * 1024 * 1024) {
                 alert('Image size should be less than 5MB');
+                setImageUploading(false);
                 return;
             }
 
+            // 如果已经有上传的图片，先清除
+            if (uploadedImages.length > 0) {
+                setUploadedImages([]);
+            }
 
             const reader = new FileReader();
             reader.onload = (event) => {
@@ -220,47 +275,65 @@ const ActionFigureAI = () => {
                         let width = img.width;
                         let height = img.height;
 
-                        // 检查宽度并按比例调整高度
+                        // 根据比例调整大图片的尺寸
                         if (width > 1024) {
                             height = Math.round((height * 1024) / width);
                             width = 1024;
                         }
 
-                        // 创建一个 canvas 来绘制压缩后的图像
+                        // 创建canvas进行图片压缩处理
                         const canvas = document.createElement('canvas');
                         canvas.width = width;
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         if (ctx) {
                             ctx.drawImage(img, 0, 0, width, height);
-                            // 转换为 WebP 格式
+                            // 转换为WebP格式
                             const webpImage = canvas.toDataURL('image/webp');
-                            // 存储压缩后的 base64 字符串用于显示
-                            setUploadedImage(webpImage);
-                            // 清除之前生成的图片
-                            setGeneratedImage(null);
+                            // 添加到已上传图片数组
+                            setUploadedImages([webpImage]);
                         }
                         canvas.remove();
                         img.remove();
-                        setImageUploading(false);
                     };
                     img.src = event.target.result as string;
                 }
             };
             reader.readAsDataURL(file);
+
+            // 上传新图片时清除已生成的图片
+            setGeneratedImage(null);
         } finally {
             setImageUploading(false);
         }
     };
 
-    const removeUploadedImage = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const removeUploadedImage = (index: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
-        setUploadedImage('');
+        setUploadedImages(prev => {
+            const newImages = [...prev];
+            newImages.splice(index, 1);
+            return newImages;
+        });
+
+        // 如果移除了所有图片，清空生成的图片结果
+        if (uploadedImages.length <= 1) {
+            setGeneratedImage(null);
+        }
+
         // 清除文件输入框的值，避免相同文件不触发onChange事件
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-    }
+    };
+
+    const removeAllImages = () => {
+        setUploadedImages([]);
+        setGeneratedImage(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
     const triggerFileInput = () => {
         fileInputRef.current?.click();
@@ -273,7 +346,7 @@ const ActionFigureAI = () => {
     };
 
     const handleGenerateClick = async () => {
-        if (!uploadedImage) {
+        if (uploadedImages.length === 0) {
             alert('Please upload an image first');
             return;
         }
@@ -291,13 +364,15 @@ const ActionFigureAI = () => {
     };
 
     const executeGeneration = async (token: string) => {
-        if (!uploadedImage) return;
+        if (uploadedImages.length === 0) return;
 
         setIsGenerating(true);
         setGenerationError('');
         setShowTurnstile(false);
         setPendingGeneration(false);
-        setTaskStatus('GENERATING');
+
+        // 生成完整提示词
+        const fullPrompt = generatePromptFromInputs();
 
         try {
             const accessToken = await getAccessToken();
@@ -308,8 +383,9 @@ const ActionFigureAI = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    image: uploadedImage,
-                    prompt: prompt,
+                    images: uploadedImages,
+                    prompt: fullPrompt,
+                    size: '2:3',
                     turnstileToken: token,
                     accessToken
                 })
@@ -319,12 +395,12 @@ const ActionFigureAI = () => {
                 useOnce(); // 扣除积分点数
                 const responseData = await response.json();
 
-                // 获取任务ID并开始轮询
-                setCurrentTaskId(responseData.taskId);
                 // 保存任务ID和上传图片到localStorage
-                localStorage.setItem('currentTaskId', responseData.taskId);
-                localStorage.setItem('pendingUploadedImage', uploadedImage);
-                localStorage.setItem('pendingPrompt', prompt);
+                localStorage.setItem('pendingTaskId', responseData.taskId);
+                localStorage.setItem('pendingUploadedImages', JSON.stringify(uploadedImages));
+                localStorage.setItem('pendingTitle', title);
+                localStorage.setItem('pendingTagline', tagline);
+                localStorage.setItem('pendingAccessories', accessories);
                 startPollingTaskStatus(responseData.taskId);
             } else {
                 const errorData = await response.json();
@@ -360,43 +436,19 @@ const ActionFigureAI = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(`Check Task ${taskId} status, respnse: ${JSON.stringify(data)}`);
+                console.log(`Check Task ${taskId} status, response: ${JSON.stringify(data)}`);
 
                 if (data.status === 'SUCCESS') {
-                    // 生成成功，显示图片
-
-                    // 处理并显示图片
-                    setGeneratedImage(data.generatedImage);
-                    const img = document.createElement('img');
-                    img.crossOrigin = 'anonymous';
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        if (ctx) {
-                            ctx.drawImage(img, 0, 0, img.width, img.height);
-                            const img_base64 = canvas.toDataURL('image/jpeg');
-                            setGeneratedImage(img_base64);
-                            // 获取当前最新的uploadedImage值和prompt值
-                            const currentUploadedImage = localStorage.getItem('pendingUploadedImage') || uploadedImage;
-                            const currentPrompt = localStorage.getItem('pendingPrompt') || prompt;
-                            console.log(`Check status success, using image: ${currentUploadedImage ? 'has image' : 'no image'}, prompt: ${currentPrompt}`);
-                            addToHistory(currentUploadedImage, img_base64, currentPrompt);
-                        }
-                        canvas.remove();
-                        img.remove();
-
-                        stopPolling();
-                        setTaskStatus('SUCCESS');
-                        setIsGenerating(false);
-                        setCurrentTaskId(null);
-                        // 清除localStorage中的任务ID、上传图片和提示词
-                        localStorage.removeItem('currentTaskId');
-                        localStorage.removeItem('pendingUploadedImage');
-                        localStorage.removeItem('pendingPrompt');
-                    };
-                    img.src = data.generatedImage;
+                    // Handle multiple generated images
+                    const generatedImagesData = data.generatedImages || [];
+                    if (generatedImagesData.length > 0) {
+                        processGeneratedImage(generatedImagesData[0]); // 使用第一张生成的图片
+                    } else if (data.generatedImage) {
+                        // Compatibility with old API that returns a single image
+                        processGeneratedImage(data.generatedImage);
+                    } else {
+                        taskFailed('Returned image data format error');
+                    }
                 } else if (data.status === 'GENERATING') {
                     // 仍在生成中，继续轮询
                 } else {
@@ -412,18 +464,71 @@ const ActionFigureAI = () => {
         }
     };
 
+    const processGeneratedImage = (imageUrl: string) => {
+        if (!imageUrl) {
+            taskFailed('No generated image received');
+            return;
+        }
+
+        // Create image element to process the image
+        const img = document.createElement('img');
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(img, 0, 0, img.width, img.height);
+                const img_base64 = canvas.toDataURL('image/jpeg');
+                setGeneratedImage(img_base64);
+
+                // Get the current uploaded images and inputs
+                let currentUploadedImages: string[] = [];
+                try {
+                    const savedImages = localStorage.getItem('pendingUploadedImages');
+                    if (savedImages) {
+                        currentUploadedImages = JSON.parse(savedImages);
+                    } else {
+                        currentUploadedImages = uploadedImages;
+                    }
+                } catch (e) {
+                    console.error('Error parsing saved uploaded images:', e);
+                    currentUploadedImages = uploadedImages;
+                }
+
+                const currentTitle = localStorage.getItem('pendingTitle') || title;
+                const currentTagline = localStorage.getItem('pendingTagline') || tagline;
+                const currentAccessories = localStorage.getItem('pendingAccessories') || accessories;
+
+                addToHistory(currentUploadedImages, img_base64, currentTitle, currentTagline, currentAccessories);
+            }
+            canvas.remove();
+            img.remove();
+
+            stopPolling();
+            setIsGenerating(false);
+            // Clear localStorage temp data
+            localStorage.removeItem('pendingTaskId');
+            localStorage.removeItem('pendingUploadedImages');
+            localStorage.removeItem('pendingTitle');
+            localStorage.removeItem('pendingTagline');
+            localStorage.removeItem('pendingAccessories');
+        };
+        img.src = imageUrl;
+    };
+
     const taskFailed = (error: string) => {
         stopPolling();
-        setTaskStatus('FAILED');
         setIsGenerating(false);
         setGenerationError(error);
-        setCurrentTaskId(null);
-        // 清除localStorage中的任务ID、上传图片和提示词
-        localStorage.removeItem('currentTaskId');
-        localStorage.removeItem('pendingUploadedImage');
-        localStorage.removeItem('pendingPrompt');
+        // Clear localStorage temp data
+        localStorage.removeItem('pendingTaskId');
+        localStorage.removeItem('pendingUploadedImages');
+        localStorage.removeItem('pendingTitle');
+        localStorage.removeItem('pendingTagline');
+        localStorage.removeItem('pendingAccessories');
         // 返还用户点数
-
     }
 
     // 停止轮询
@@ -459,7 +564,7 @@ const ActionFigureAI = () => {
     };
 
     const handleAdClick = async (isPreGenAd: boolean) => {
-        // 这里可以添加实际的广告跳转逻辑
+        // Open ad in new tab
         const currentWindow = window
         const newTab = window.open('https://povaique.top/4/9150862', '_blank', 'noopener noreferrer');
         if (newTab) {
@@ -468,24 +573,28 @@ const ActionFigureAI = () => {
         }
 
         if (isPreGenAd) {
-            // 关闭生成前广告
+            // Close pre-generation ad
             setShowPreGenAd(false);
             handleGenerateClick();
         } else {
-            // 关闭生成后广告并移除模糊效果
+            // Close post-generation ad and remove blur effect
             setShowPostGenAd(false);
             setIsResultBlurred(false);
-            addToHistory(uploadedImage, generatedImage);
+            // Use first uploaded image when adding to history
+            if (uploadedImages.length > 0) {
+                addToHistory(uploadedImages, generatedImage);
+            }
         }
     };
 
-    const addToHistory = (originalImage: string, actionFigureImage: string, promptText?: string) => {
-        // 添加到历史记录，包含提示词
+    const addToHistory = (originalImages: string[], actionFigureImage: string, titleText?: string, taglineText?: string, accessoriesText?: string) => {
+        // Add to history record, including title, tagline and accessories
         const newHistoryItem: HistoryItem = {
-            originalImage: originalImage,
+            originalImages: originalImages,
             actionFigureImage: actionFigureImage,
-            timestamp: Date.now(),
-            prompt: promptText || undefined
+            title: titleText || undefined,
+            tagline: taglineText || undefined,
+            accessories: accessoriesText || undefined,
         };
 
         setHistory(prev => [newHistoryItem, ...prev]);
@@ -576,17 +685,17 @@ const ActionFigureAI = () => {
                                         aria-label="Upload image"
                                     />
 
-                                    {uploadedImage ? (
+                                    {uploadedImages.length > 0 ? (
                                         <div className="relative max-h-64 overflow-hidden">
                                             <img
-                                                src={uploadedImage}
+                                                src={uploadedImages[0]}
                                                 alt="Uploaded image"
                                                 className="mx-auto max-h-64 object-contain"
                                             />
                                             <div className="absolute bottom-0 right-0 m-2">
                                                 <button
                                                     className="bg-white/80 p-1 rounded-full text-[#1c4c3b] hover:bg-white transition"
-                                                    onClick={removeUploadedImage}
+                                                    onClick={(e) => removeUploadedImage(0, e)}
                                                     title="Remove uploaded image"
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -607,15 +716,39 @@ const ActionFigureAI = () => {
                                 </div>
                             </div>
 
-                            {/* 提示词输入框 - 高度增加 */}
+                            {/* 替换原有的提示词输入框为三个新的输入框 */}
                             <div className="mb-6">
-                                <label htmlFor="prompt-input" className="block text-[#1c4c3b] font-medium mb-2 text-left">Enter your prompt</label>
+                                <label htmlFor="title-input" className="block text-[#1c4c3b] font-medium mb-2 text-left">Title (e.g. "COSMIC EXPLORER")</label>
+                                <input
+                                    id="title-input"
+                                    type="text"
+                                    value={title}
+                                    onChange={(e) => setTitle(e.target.value)}
+                                    placeholder="Enter action figure title..."
+                                    className="w-full p-3 border border-[#89aa7b] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1c4c3b]"
+                                />
+                            </div>
+
+                            <div className="mb-6">
+                                <label htmlFor="tagline-input" className="block text-[#1c4c3b] font-medium mb-2 text-left">Tagline (e.g. "MASTER OF THE UNIVERSE!")</label>
+                                <input
+                                    id="tagline-input"
+                                    type="text"
+                                    value={tagline}
+                                    onChange={(e) => setTagline(e.target.value)}
+                                    placeholder="Enter action figure tagline..."
+                                    className="w-full p-3 border border-[#89aa7b] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1c4c3b]"
+                                />
+                            </div>
+
+                            <div className="mb-6">
+                                <label htmlFor="accessories-input" className="block text-[#1c4c3b] font-medium mb-2 text-left">Accessories (e.g. "a laser sword, a shield, a helmet, a space gun")</label>
                                 <div className="flex gap-2">
                                     <textarea
-                                        id="prompt-input"
-                                        value={prompt}
-                                        onChange={(e) => setPrompt(e.target.value)}
-                                        placeholder="Describe your action figure style..."
+                                        id="accessories-input"
+                                        value={accessories}
+                                        onChange={(e) => setAccessories(e.target.value)}
+                                        placeholder="List accessories separated by commas..."
                                         className="w-full p-3 border border-[#89aa7b] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1c4c3b] min-h-[80px] resize-y"
                                     ></textarea>
                                     <div className="flex flex-col gap-2 w-48">
@@ -635,9 +768,9 @@ const ActionFigureAI = () => {
                                             <span className="text-sm">Get Inspiration</span>
                                         </button>
                                         <button
-                                            onClick={handleRandomPrompt}
+                                            onClick={handleRandomInputs}
                                             className="flex items-center justify-center gap-1 px-3 py-2 bg-[#89aa7b] text-white rounded-lg hover:bg-[#6d8c60] transition"
-                                            title="Get a random prompt"
+                                            title="Get random inputs"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -666,12 +799,12 @@ const ActionFigureAI = () => {
                             {/* 按钮区域 */}
                             <div className="flex flex-col justify-center mb-6 gap-2">
                                 <button
-                                    className={`w-auto px-6 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition ${isGenerating || !uploadedImage || pendingGeneration ? 'opacity-50 cursor-not-allowed' : ''
+                                    className={`w-auto px-6 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition ${isGenerating || uploadedImages.length === 0 || pendingGeneration ? 'opacity-50 cursor-not-allowed' : ''
                                         }`}
                                     onClick={handleGenerateClick}
-                                    disabled={isGenerating || !uploadedImage || pendingGeneration}
+                                    disabled={isGenerating || uploadedImages.length === 0 || pendingGeneration}
                                 >
-                                    {isGenerating ? 'Generating...' : pendingGeneration ? 'Verifying...' : 'Create Action Figure'}
+                                    {isGenerating ? 'Generating...' : pendingGeneration ? 'Verifying...' : 'Generate Action Figure'}
                                 </button>
 
                                 {/* 只在未登录状态下显示免费点数提示 */}
@@ -723,7 +856,7 @@ const ActionFigureAI = () => {
                             </div>
                         )}
 
-                        {generatedImage && uploadedImage && !isGenerating && (
+                        {generatedImage && uploadedImages.length > 0 && !isGenerating && (
                             <div className="max-w-4xl mx-auto relative">
                                 {/* 添加模糊效果覆盖层 */}
                                 {isResultBlurred && (
@@ -742,16 +875,20 @@ const ActionFigureAI = () => {
                                 <ImageComparisonCard
                                     id="generated-image-comparison-card"
                                     data-type="generated-image-comparison-card"
-                                    original={uploadedImage}
+                                    original={uploadedImages[0]}
                                     generate={generatedImage}
-                                    prompt={prompt}
+                                    tags={[
+                                        ['Title', title],
+                                        ['Tagline', tagline],
+                                        ['Accessories', accessories]
+                                    ]}
                                 />
                             </div>
                         )}
                     </section>
                 )}
 
-                {/* 历史记录区域 */}
+                {/* 历史记录区域 - 更新展示内容 */}
                 {history.length > 0 && (
                     <section className="container mx-auto px-4 py-8">
                         <div className="flex justify-between items-center mb-6">
@@ -765,16 +902,117 @@ const ActionFigureAI = () => {
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {history.map((item, index) => (
-                                <ImageComparisonCard
-                                    key={index}
-                                    original={item.originalImage}
-                                    generate={item.actionFigureImage}
-                                    prompt={item.prompt}
-                                />
+                                <div className="relative">
+                                    {item.originalImages && item.originalImages.length > 0 && item.actionFigureImage ? (
+                                        <ImageComparisonCard
+                                            id={`history-image-comparison-card-${index}`}
+                                            data-type="history-image-comparison-card"
+                                            original={item.originalImages[0]}
+                                            generate={item.actionFigureImage}
+                                            tags={[
+                                                ['Title', item.title],
+                                                ['Tagline', item.tagline],
+                                                ['Accessories', item.accessories]
+                                            ]}
+                                        />
+                                    ) : (
+                                        <div className="flex">
+                                            <div className="w-1/2 p-2">
+                                                {item.originalImages && item.originalImages.length > 0 ? (
+                                                    <img
+                                                        src={item.originalImages[0]}
+                                                        alt={`Original image`}
+                                                        className="w-full h-auto object-cover rounded-lg"
+                                                        onClick={() => handleImageClick(item.originalImages[0])}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                        <span className="text-gray-500">No original image</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="w-1/2 p-2">
+                                                {item.actionFigureImage ? (
+                                                    <img
+                                                        src={item.actionFigureImage}
+                                                        alt={`Action figure ${index + 1}`}
+                                                        className="w-full h-auto object-cover rounded-lg"
+                                                        onClick={() => handleImageClick(item.actionFigureImage)}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                        <span className="text-gray-500">No generated image</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </section>
                 )}
+
+                {/* 示例区域 - 更新展示内容 */}
+                <section id="examples" className="container mx-auto px-4 py-16">
+                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Action Figure AI Inspiration Gallery</h2>
+                    <p className="text-xl text-[#506a3a] mb-10 text-center">
+                        Check out these examples from our action figure maker and use their details to create your own AI action figures
+                    </p>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+                        {inspirationExamples.map((example, index) => (
+                            <div key={index} className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition border border-[#89aa7b]">
+                                <div className="relative">
+                                    <div className="flex">
+                                        <div className="w-1/2 p-2">
+                                            <img
+                                                src={example.original}
+                                                alt={`Original image ${index + 1}`}
+                                                className="w-full h-auto object-cover rounded-lg"
+                                                onClick={() => handleImageClick(example.original)}
+                                            />
+                                        </div>
+                                        <div className="w-1/2 p-2">
+                                            <img
+                                                src={example.actionFigure}
+                                                alt={`Action figure example ${index + 1}`}
+                                                className="w-full h-auto object-cover rounded-lg"
+                                                onClick={() => handleImageClick(example.actionFigure)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4 bg-white">
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-sm text-[#506a3a]"><strong>Title:</strong> <span className='italic'>{example.title}</span></p>
+                                        <p className="text-sm text-[#506a3a]"><strong>Tagline:</strong> <span className='italic'>{example.tagline}</span></p>
+                                        <p className="text-sm text-[#506a3a]"><strong>Accessories:</strong> <span className='italic'>{example.accessories}</span></p>
+                                        <button
+                                            className="flex-shrink-0 p-2 bg-[#e7f0dc] text-[#1c4c3b] rounded-lg hover:bg-[#d5e6c3] transition flex items-center gap-1 self-end"
+                                            onClick={() => {
+                                                setTitle(example.title);
+                                                setTagline(example.tagline);
+                                                setAccessories(example.accessories);
+                                                // 滚动到工具区域
+                                                const toolSection = document.getElementById('tool-section');
+                                                if (toolSection) {
+                                                    toolSection.scrollIntoView({ behavior: 'smooth' });
+                                                }
+                                            }}
+                                            title="Use these details"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                                            </svg>
+                                            <span className="text-xs">Apply</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
                 {/* 详细使用指南部分 - MOVED HERE */}
                 <section id="how-to-use" className="container mx-auto px-4 py-16">
@@ -886,63 +1124,6 @@ const ActionFigureAI = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-
-                {/* 示例区域 - 改为与历史记录相同的对比显示格式 */}
-                <section id="examples" className="container mx-auto px-4 py-16">
-                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Action Figure AI Inspiration Gallery</h2>
-                    <p className="text-xl text-[#506a3a] mb-10 text-center">
-                        Check out these examples from our action figure maker and use their prompts to create your own AI action figures
-                    </p>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
-                        {inspirationExamples.map((example, index) => (
-                            <div key={index} className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition border border-[#89aa7b]">
-                                <div className="relative">
-                                    <div className="flex">
-                                        <div className="w-1/2 p-2">
-                                            <img
-                                                src={example.original}
-                                                alt={`Original image ${index + 1}`}
-                                                className="w-full h-auto object-cover rounded-lg"
-                                                onClick={() => handleImageClick(example.original)}
-                                            />
-                                        </div>
-                                        <div className="w-1/2 p-2">
-                                            <img
-                                                src={example.actionFigure}
-                                                alt={`Action figure example ${index + 1}`}
-                                                className="w-full h-auto object-cover rounded-lg"
-                                                onClick={() => handleImageClick(example.actionFigure)}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="p-4 bg-white">
-                                    <div className="flex justify-between items-center gap-2">
-                                        <p className="text-sm text-[#506a3a] flex-1"><strong>Prompt:</strong><span className='italic'>{example.prompt}</span></p>
-                                        <button
-                                            className="flex-shrink-0 p-2 bg-[#e7f0dc] text-[#1c4c3b] rounded-lg hover:bg-[#d5e6c3] transition flex items-center gap-1"
-                                            onClick={() => {
-                                                setPrompt(example.prompt);
-                                                // 滚动到工具区域
-                                                const toolSection = document.getElementById('tool-section');
-                                                if (toolSection) {
-                                                    toolSection.scrollIntoView({ behavior: 'smooth' });
-                                                }
-                                            }}
-                                            title="Use this prompt"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                            </svg>
-                                            <span className="text-xs">Apply</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
                     </div>
                 </section>
 

@@ -8,6 +8,36 @@ export default {
       layout: 'raw'
     }
   },
+  tools: {
+    type: 'menu',
+    title: 'Tools',
+    items: [
+      {
+        title: 'Ghibli Style Image Generator',
+        href: '/ghibli-style-image-generator'
+      },
+      {
+        title: 'Action Figure AI',
+        href: '/action-figure-ai'
+      }
+    ]
+  },
+  "ghibli-style-image-generator": {
+    type: 'page',
+    title: 'Ghibli Style Image Generator',
+    display: 'hidden',
+    theme: {
+      layout: 'raw'
+    }
+  },
+  "action-figure-ai": {
+    type: 'page',
+    title: 'Action Figure AI',
+    display: 'hidden',
+    theme: {
+      layout: 'raw'
+    }
+  },
   success: {
     type: 'page',
     title: 'Payment Success',
@@ -39,6 +69,14 @@ export default {
     title: 'Pricing',
     theme: {
       layout: 'raw'
+    }
+  },
+  "refund-policy": {
+    type: 'page',
+    title: 'Refund Policy',
+    display: 'hidden',
+    theme: {
+      layout: 'default'
     }
   },
   examples: {

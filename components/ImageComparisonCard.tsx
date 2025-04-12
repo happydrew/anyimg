@@ -7,16 +7,17 @@ const ImageComparisonCard = ({
     data_type,
     original,
     generate,
-    prompt
+    tags
 }: {
     id?: string,
     data_type?: string,
     original: string,
     generate: string,
-    prompt?: string
+    tags: [tag: string, value: string][]
 }) => {
     const [selectedImage, setSelectedImage] = useState('');
     const [showImageViewer, setShowImageViewer] = useState(false);
+    const [expandTags, setExpandTags] = useState(false);
 
     const handleImageClick = (imageSrc: string) => {
         setSelectedImage(imageSrc);
@@ -24,6 +25,9 @@ const ImageComparisonCard = ({
     };
 
     const handleDownload = (original: string, ghibli: string, combined: boolean = false) => {
+        // 检测是否为移动设备
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
         // 下载单张图片
         const downloadSingle = async (src: string, filename: string) => {
             let watermark_img = src;
@@ -50,12 +54,32 @@ const ImageComparisonCard = ({
                 const blob = await response.blob();
                 const blobUrl = URL.createObjectURL(blob);
 
-                const link = document.createElement("a");
-                link.href = blobUrl;
-                link.download = filename;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                if (isMobile) {
+                    // 移动设备处理方式
+                    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                        // iOS设备特殊处理
+                        window.open(blobUrl, '_blank');
+                        alert('请长按图片然后选择"保存图片"');
+                    } else {
+                        // Android设备
+                        const link = document.createElement("a");
+                        link.href = blobUrl;
+                        link.target = "_blank";
+                        link.rel = "noopener noreferrer";
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        alert('如果下载未自动开始，请长按图片然后选择"保存图片"');
+                    }
+                } else {
+                    // 桌面设备处理方式
+                    const link = document.createElement("a");
+                    link.href = blobUrl;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
 
                 URL.revokeObjectURL(blobUrl); // 释放内存
 
@@ -328,11 +352,34 @@ const ImageComparisonCard = ({
                         </div>
                     </div>
                 </div>
-                {prompt && (
-                    <div className="p-3 bg-[#f8fbf3] border-t border-[#e7f0dc]">
-                        <p className="text-sm text-[#506a3a]"><span className="font-bold">Prompt:</span><span className="italic">{prompt}</span> </p>
+                <div className="p-4 bg-white rounded-b-lg shadow-md border border-[#89aa7b] border-t-0">
+                    <div className="relative">
+                        <div className={`${expandTags ? '' : 'max-h-6 overflow-hidden'} transition-all duration-300`}>
+                            {tags && tags.map((tag) => (
+                                <p key={tag[0]} className="text-sm text-[#506a3a]"><strong>{tag[0]}:</strong><span className="italic"> {tag[1]}</span></p>
+                            ))}
+                        </div>
+                        {!expandTags && tags && tags.length > 0 && (
+                            <div className="absolute right-0 top-0 flex items-center h-6">
+                                <div className="w-12 h-full bg-gradient-to-r from-transparent to-white"></div>
+                                <button
+                                    onClick={() => setExpandTags(true)}
+                                    className="ml-1 text-sm text-[#506a3a] font-medium hover:text-[#89aa7b]"
+                                >
+                                    More
+                                </button>
+                            </div>
+                        )}
+                        {expandTags && (
+                            <button
+                                onClick={() => setExpandTags(false)}
+                                className="mt-2 text-sm text-[#506a3a] font-medium hover:text-[#89aa7b]"
+                            >
+                                Less
+                            </button>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );

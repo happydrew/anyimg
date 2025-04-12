@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 const logo = (
   <div className="flex justify-center items-center" title="AutoFormAI">
-    <Image src="/favicon.png" alt="AnyImg logo" width={40} height={40} />
+    <Image src="/favicon.ico" alt="AnyImg logo" width={40} height={40} />
     <span className={`${inter.className} font-cartoon ml-2 text-green-800 text-xl lg:text-3xl font-black drop-shadow-[0_0_10px_#D2B48C]`}>
       {/* Ghibli */}
       <span className='text-amber-500'>Any</span>
@@ -87,6 +87,7 @@ function Footer() {
           items={[
             { title: "Privacy Policy", url: "/privacy-policy" },
             { title: "Terms of Service", url: "/terms-of-service" },
+            { title: "Refund Policy", url: "/refund-policy" },
             { title: "Concat", url: "/concat" }
           ]}
         />

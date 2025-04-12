@@ -48,7 +48,6 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
     </Script> */}
 
     {/* Google tag (gtag.js) */}
-
     <Script async src="https://www.googletagmanager.com/gtag/js?id=G-QMS8MYP86F"></Script>
     <Script>
       {`

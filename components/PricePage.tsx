@@ -4,46 +4,47 @@ import { Button, Card, CardBody, CardFooter, CardHeader, Spinner } from '@nextui
 import { useAuth } from '@/contexts/AuthContext';
 import { FaCheckCircle, FaCoins, FaStar } from 'react-icons/fa';
 import { useRouter } from 'next/router';
+import { MdDiamond } from 'react-icons/md';
 
 // Plans data
 const plans = [
     {
-        id: 'standard',
-        name: 'Standard',
+        id: 'basic',
+        name: 'Basic',
         icon: <FaStar className="text-amber-500 w-10 h-10" />,
-        price: '$4.49',
-        credits: 50,
-        valueProposition: 'Best Value',
+        price: '$5',
+        credits: 100,
+        valueProposition: 'Great Value',
         features: [
-            '50 AI drawing credits',
-            'Enhanced style transformation',
-            'Priority processing',
+            '100 AI drawing credits',
+            'Enhanced image creation',
+            'Standard processing',
             'Unlimited validity period',
         ],
-        description: 'Our most popular plan with excellent value. Create beautiful Ghibli-style images without breaking the bank!',
-        recommended: true,
+        description: 'Perfect for beginners exploring AI image creation. Get started with AnyImg at an affordable price!',
+        recommended: false,
         color: 'bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20',
         buttonClass: 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white shadow-md hover:shadow-lg transition-shadow',
     },
-    // {
-    //     id: 'pro',
-    //     name: 'Pro',
-    //     icon: <MdDiamond className="text-purple-500 w-10 h-10" />,
-    //     price: '$9.49',
-    //     credits: 120,
-    //     valueProposition: 'Ultimate Experience',
-    //     features: [
-    //         '120 AI drawing credits',
-    //         'Highest quality transformations',
-    //         'Priority processing',
-    //         'Unlimited validity period',
-    //         '5 bonus style examples',
-    //     ],
-    //     description: 'For dedicated creators with a lower cost per credit. Fully explore the magical Ghibli universe with our best value package!',
-    //     recommended: false,
-    //     color: 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20',
-    //     buttonClass: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md hover:shadow-lg transition-shadow',
-    // }
+    {
+        id: 'premium',
+        name: 'Premium',
+        icon: <MdDiamond className="text-purple-500 w-10 h-10" />,
+        price: '$10',
+        credits: 200,
+        valueProposition: 'Best Value',
+        features: [
+            '200 AI drawing credits',
+            'Enhanced image creation',
+            'Priority processing',
+            'Unlimited validity period',
+            'Premium customer support',
+        ],
+        description: 'Our most popular plan with excellent value. Create twice as many images at a better per-credit rate!',
+        recommended: true,
+        color: 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20',
+        buttonClass: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md hover:shadow-lg transition-shadow',
+    }
 ];
 
 export default function PricePage() {
@@ -125,9 +126,9 @@ export default function PricePage() {
                                 className="mx-auto"
                             />
                         </div> */}
-                    <h1 className="text-4xl font-bold text-[#1c4c3b] mb-4">Choose Your Magic Plan</h1>
+                    <h1 className="text-4xl font-bold text-[#1c4c3b] mb-4">Choose Your Plan</h1>
                     <p className="text-xl text-[#506a3a] max-w-2xl mx-auto">
-                        Each credit generates one beautiful Ghibli-style image. Select the plan that best fits your creative needs.
+                        Each credit generates one AI image. Select the plan that best fits your creative needs.
                     </p>
                     {/* TEMPORARY: Display development mode notice */}
                     {/* <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-amber-600 max-w-md mx-auto">
@@ -141,11 +142,11 @@ export default function PricePage() {
                 </div>
 
                 {/* Plan cards */}
-                <div className="flex flex-wrap justify-center items-center gap-16 max-w-96 w-full mx-auto">
+                <div className="flex flex-wrap justify-center items-center gap-16 w-full mx-auto">
                     {plans.map((plan) => (
                         <Card
                             key={plan.id}
-                            className={`${plan.color} border ${plan.recommended ? 'border-amber-400 shadow-xls z-10' : 'border-[#89aa7b]/30 shadow-md'} rounded-2xl overflow-visible`}
+                            className={`max-w-96 ${plan.color} border ${plan.recommended ? 'border-amber-400 shadow-xls z-10' : 'border-[#89aa7b]/30 shadow-md'} rounded-2xl overflow-visible`}
                             style={{ height: '650px' }}
                         >
                             {plan.recommended && (
@@ -215,15 +216,19 @@ export default function PricePage() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-[#1c4c3b] mb-2">What can I create with one credit?</h3>
-                                <p className="text-[#506a3a]">Each credit allows you to transform one regular image into Ghibli style, or generate a brand new Ghibli-style image from a text prompt.</p>
+                                <p className="text-[#506a3a]">Each credit allows you to generate one AI image based on your prompts or input images.</p>
                             </div>
                             <div>
                                 <h3 className="font-bold text-[#1c4c3b] mb-2">What payment methods do you accept?</h3>
                                 <p className="text-[#506a3a]">We accept credit cards, PayPal, and major digital payment methods. All transactions are securely encrypted.</p>
                             </div>
                             <div>
-                                <h3 className="font-bold text-[#1c4c3b] mb-2">What if I'm not satisfied with the generated image?</h3>
-                                <p className="text-[#506a3a]">You can try adjusting your prompt or uploading a different source image. We don't offer credit refunds, but we provide technical support to help you get the best results.</p>
+                                <h3 className="font-bold text-[#1c4c3b] mb-2">Can I get a refund?</h3>
+                                <p className="text-[#506a3a]">Yes, unused credits can be refunded proportionally. Please check our <a href="/refund-policy" className="text-blue-600 hover:underline">Refund Policy</a> for details.</p>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-[#1c4c3b] mb-2">Are there any free credits?</h3>
+                                <p className="text-[#506a3a]">New users receive 3 free credits to try our service before purchasing.</p>
                             </div>
                         </div>
                     </div>
@@ -235,7 +240,7 @@ export default function PricePage() {
                         className="bg-gradient-to-r from-[#1c4c3b] to-[#2a6854] text-white px-8 py-6 text-lg rounded-xl shadow-lg hover:shadow-xl transition-shadow"
                         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
-                        Start Your Ghibli Journey
+                        Start Creating
                     </Button>
                 </div>
             </div>

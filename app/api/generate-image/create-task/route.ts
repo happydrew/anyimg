@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
         // return NextResponse.json({
         //     success: true,
-        //     taskId: 'e9cbb27d824fae31c695531b99296ae9',
+        //     taskId: 'b6122a5fa6a347f90c1312dd19eb6da7',
         //     status: 'GENERATING',
         //     message: 'Generation task created successfully'
         // }, { status: 200 });
@@ -22,7 +22,8 @@ export async function POST(request: NextRequest) {
 
         // 解析请求体
         const requestData = await request.json();
-        const { image, prompt, turnstileToken, accessToken } = requestData;
+        console.log(`request data: ${JSON.stringify(requestData)}`);
+        let { images, prompt, size, turnstileToken, accessToken } = requestData;
 
         if (!turnstileToken || turnstileToken.length < 10) {
             console.error('Missing turnstileToken, or invalid length');
@@ -32,12 +33,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (!image || !prompt) {
+        if (!images || !prompt) {
             console.error('Missing image or prompt');
             return NextResponse.json(
                 { error: 'Missing image or prompt' },
                 { status: 400 }
             );
+        }
+
+        if (!size) {
+            size = '1:1';
         }
 
         // 验证 Turnstile token 并检查用户点数
@@ -102,15 +107,17 @@ export async function POST(request: NextRequest) {
         }
 
         // 上传图片到ImgBB并获取URL
-        const imageUrl = await uploadToImgBB(image);
-        console.log(`Image uploaded to ImgBB: ${imageUrl}`);
+        const imageUrls = await Promise.all(images.map(image => uploadToImgBB(image)));
+        console.log(`Images uploaded to ImgBB: ${imageUrls}`);
 
         // 构建请求体，使用ImgBB返回的URL
         const apiRequestBody: any = {
-            fileUrl: imageUrl, // 使用ImgBB返回的URL代替原始base64
+            filesUrl: imageUrls, // 使用ImgBB返回的URL代替原始base64
             prompt: prompt,
-            size: '2:3'
+            size: size
         };
+
+        console.log(`API request body: ${JSON.stringify(apiRequestBody)}`);
 
         // 发送请求到 Kie.ai API
         const apiResponse = await fetch('https://kieai.erweima.ai/api/v1/gpt4o-image/generate', {
@@ -209,38 +216,8 @@ async function uploadToImgBB(image: string): Promise<string> {
         console.log('Image uploaded to ImgBB successfully');
         return data.data.url;
     } catch (error) {
-        console.error('Error using FormData method:', error);
-
-        // 方法2: 如果FormData方法失败，尝试使用URL编码方式
-        console.log('Trying alternative method for ImgBB upload...');
-
-        const params = new URLSearchParams();
-        params.append('key', imgbbApiKey);
-        params.append('image', imageBase64);
-        params.append('expiration', '300');
-
-        const altResponse = await fetch('https://api.imgbb.com/1/upload', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params
-        });
-
-        if (!altResponse.ok) {
-            const errorData = await altResponse.json();
-            console.error('ImgBB API error (alt method):', JSON.stringify(errorData));
-            throw new Error('Failed to upload image to ImgBB');
-        }
-
-        const altData = await altResponse.json();
-        if (!altData.success || !altData.data?.url) {
-            console.error('ImgBB API response invalid (alt method):', JSON.stringify(altData));
-            throw new Error('Invalid response from ImgBB');
-        }
-
-        console.log('Image uploaded to ImgBB successfully (alt method)');
-        return altData.data.url;
+        console.error('Error uploading image to ImgBB:', error);
+        throw error;
     }
 }
 
