@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        if (!images || !prompt) {
-            console.error('Missing image or prompt');
+        if (!prompt) {
+            console.error('Missing prompt');
             return NextResponse.json(
-                { error: 'Missing image or prompt' },
+                { error: 'Missing prompt' },
                 { status: 400 }
             );
         }
@@ -107,12 +107,18 @@ export async function POST(request: NextRequest) {
         }
 
         // 上传图片到ImgBB并获取URL
-        const imageUrls = await Promise.all(images.map(image => uploadToImgBB(image)));
-        console.log(`Images uploaded to ImgBB: ${imageUrls}`);
+        let imageUrls = [];
+        if (images && images.length > 0) {
+            imageUrls = await Promise.all(images.map(image => uploadToImgBB(image)));
+            console.log(`Images uploaded to ImgBB: ${imageUrls}`);
+        }
 
         // 构建请求体，使用ImgBB返回的URL
-        const apiRequestBody: any = {
+        const apiRequestBody: any = imageUrls.length > 0 ? {
             filesUrl: imageUrls, // 使用ImgBB返回的URL代替原始base64
+            prompt: prompt,
+            size: size
+        } : {
             prompt: prompt,
             size: size
         };

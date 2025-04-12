@@ -340,8 +340,8 @@ const HomePage = () => {
     };
 
     const handleGenerateClick = async () => {
-        if (uploadedImages.length === 0) {
-            alert('Please upload at least one image');
+        if (uploadedImages.length === 0 && !prompt) {
+            alert('Please upload at least one image or enter a prompt');
             return;
         }
 
@@ -358,7 +358,7 @@ const HomePage = () => {
     };
 
     const executeGeneration = async (token: string) => {
-        if (uploadedImages.length === 0) return;
+        if (uploadedImages.length === 0 && !prompt) return;
 
         setIsGenerating(true);
         setGenerationError('');
@@ -374,9 +374,9 @@ const HomePage = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    images: uploadedImages,
+                    ...(uploadedImages && { images: uploadedImages }),
                     prompt: prompt,
-                    size: selectedSize, // Add size parameter
+                    size: selectedSize,
                     turnstileToken: token,
                     accessToken
                 })
@@ -1011,10 +1011,10 @@ const HomePage = () => {
                             {/* 按钮区域 */}
                             <div className="flex flex-col justify-center mb-6 gap-2">
                                 <button
-                                    className={`w-auto px-6 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition ${isGenerating || uploadedImages.length === 0 || pendingGeneration ? 'opacity-50 cursor-not-allowed' : ''
+                                    className={`w-auto px-6 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition ${isGenerating || (uploadedImages.length === 0 && !prompt) || pendingGeneration ? 'opacity-50 cursor-not-allowed' : ''
                                         }`}
                                     onClick={handleGenerateClick}
-                                    disabled={isGenerating || uploadedImages.length === 0 || pendingGeneration}
+                                    disabled={isGenerating || (uploadedImages.length === 0 && !prompt) || pendingGeneration}
                                 >
                                     {isGenerating ? 'Generating...' : pendingGeneration ? 'Verifying...' : 'Generate Image'}
                                 </button>
