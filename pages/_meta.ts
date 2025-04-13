@@ -59,11 +59,11 @@ export default {
     title: 'About',
     href: '/#about'
   },
-  features: {
-    type: 'page',
-    title: 'Features',
-    href: '/#features'
-  },
+  // features: {
+  //   type: 'page',
+  //   title: 'Features',
+  //   href: '/#features'
+  // },
   pricing: {
     type: 'page',
     title: 'Pricing',

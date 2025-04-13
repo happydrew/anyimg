@@ -250,39 +250,50 @@ export default function PricePage() {
             {/* Purchase Information Modal */}
             <Modal
                 isOpen={isPurchaseModalOpen}
-                onClose={() => setIsPurchaseModalOpen(false)}
-                size="lg"
+                onOpenChange={(open) => setIsPurchaseModalOpen(open)}
+                size="md"
+                placement="center"
+                classNames={{
+                    base: "bg-white rounded-lg shadow-lg",
+                    body: "py-2 px-0",
+                    closeButton: "hover:bg-gray-100",
+                }}
+                backdrop="blur"
             >
                 <ModalContent>
-                    <ModalHeader className="flex flex-col gap-1">
-                        <h3 className="text-xl font-bold text-[#1c4c3b]">Purchase Information</h3>
-                    </ModalHeader>
-                    <ModalBody>
-                        <div className="p-4 text-[#506a3a]">
-                            <p className="mb-4">Thank you for your support of AnyImg!</p>
-                            <p className="mb-4">Our payment system is currently under development. Please contact <span className="font-bold">zhugetd@gmail.com</span> to purchase credits.</p>
-                            <p className="mb-4">Please include in your email:</p>
-                            <ul className="list-disc pl-5 mb-4">
-                                <li>The account to be recharged</li>
-                                <li>The plan you wish to purchase</li>
-                            </ul>
-                            <p className="mb-4">We will credit your account within 1 hour after receiving your email.</p>
-                            <p className="font-medium">Payment methods we currently support:</p>
-                            <ul className="list-disc pl-5">
-                                <li>PayPal</li>
-                                <li>Alipay</li>
-                                <li>WeChat Pay</li>
-                            </ul>
-                        </div>
-                    </ModalBody>
-                    <ModalFooter>
-                        <Button
-                            className="bg-gradient-to-r from-[#1c4c3b] to-[#2a6854] text-white"
-                            onClick={() => setIsPurchaseModalOpen(false)}
-                        >
-                            Got it
-                        </Button>
-                    </ModalFooter>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader className="flex flex-col gap-1 pb-2 border-b">
+                                <h3 className="text-xl font-bold text-[#1c4c3b]">Purchase Information</h3>
+                            </ModalHeader>
+                            <ModalBody>
+                                <div className="px-4 text-[#506a3a]">
+                                    <p className="mb-3">Thank you for your support of AnyImg!</p>
+                                    <p className="mb-3">Our payment system is currently under development. Please contact <span className="font-bold">zhugetd@gmail.com</span> to purchase credits.</p>
+                                    <p className="mb-2">Please include in your email:</p>
+                                    <ul className="list-disc pl-5 mb-3">
+                                        <li>The account to be recharged</li>
+                                        <li>The plan you wish to purchase</li>
+                                    </ul>
+                                    <p className="mb-3">We will credit your account within 1 hour after receiving your email.</p>
+                                    <p className="font-medium mb-1">Payment methods we currently support:</p>
+                                    <ul className="list-disc pl-5">
+                                        <li>PayPal</li>
+                                        <li>Alipay</li>
+                                        <li>WeChat Pay</li>
+                                    </ul>
+                                </div>
+                            </ModalBody>
+                            <ModalFooter className="border-t py-3">
+                                <Button
+                                    className="bg-gradient-to-r from-[#1c4c3b] to-[#2a6854] text-white px-6"
+                                    onClick={onClose}
+                                >
+                                    Got it
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
                 </ModalContent>
             </Modal>
         </div>
