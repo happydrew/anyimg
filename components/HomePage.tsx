@@ -63,19 +63,19 @@ const HomePage = () => {
     // 热门工具列表
     const hotTools: Tool[] = [
         {
-            id: 'action-figure',
-            name: 'Action Figure Generator',
-            description: 'Transform photo into action figure',
-            logo: '/action-figure-logo.png',
-            url: '/action-figure-ai',
+            id: 'text-to-image',
+            name: 'Text to Image Generator',
+            description: 'Create stunning images from text prompts',
+            logo: '/text-to-image-logo.png',
+            url: '/text-to-image',
             isHot: true
         },
         {
-            id: 'ghibli-style',
-            name: 'Ghibli Style Image Generator',
-            description: 'Convert photos into Studio Ghibli style',
-            logo: '/ghibli-style-logo.png',
-            url: '/ghibli-style-image-generator',
+            id: 'image-enhancement',
+            name: 'AI Image Enhancement',
+            description: 'Enhance and improve your images with AI',
+            logo: '/image-enhancement-logo.png',
+            url: '/image-enhancement',
             isHot: true
         }
     ];
@@ -710,7 +710,7 @@ const HomePage = () => {
 
             <main className="pt-8">
                 {/* Hot tools section - much smaller design with horizontal layout */}
-                <section className="container mx-auto px-3 mb-5">
+                {/* <section className="container mx-auto px-3 mb-5">
                     <div className="bg-gradient-to-r from-[#ff6b6b] to-[#ffb347] p-3 rounded-lg">
                         <h2 className="text-lg font-bold mb-3 text-white text-center">🔥 Popular AI Tools 🔥</h2>
                         <div className="flex flex-wrap justify-around gap-6">
@@ -720,7 +720,6 @@ const HomePage = () => {
                                     href={tool.url}
                                     className="bg-white/90 rounded-lg shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5 flex items-center relative w-64 h-20 p-2"
                                 >
-                                    {/* Hot indicator in top right */}
                                     {tool.isHot && (
                                         <div className="absolute top-0 right-0 transform translate-x-1 -translate-y-1">
                                             <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -729,7 +728,6 @@ const HomePage = () => {
                                         </div>
                                     )}
 
-                                    {/* Tool icon on left */}
                                     <div className="w-16 h-16 flex-shrink-0 mr-1">
                                         <img
                                             src={tool.logo}
@@ -738,7 +736,6 @@ const HomePage = () => {
                                         />
                                     </div>
 
-                                    {/* Tool info on right */}
                                     <div className="flex flex-col justify-center text-left overflow-hidden">
                                         <h3 className="font-bold text-sm text-[#1c4c3b] truncate">{tool.name}</h3>
                                         <p className="text-xs text-[#506a3a] line-clamp-2">{tool.description}</p>
@@ -747,22 +744,25 @@ const HomePage = () => {
                             ))}
                         </div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* 英雄区域 */}
                 <div id="hero_containter" className='w-full flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12'>
                     <section className="w-full md:max-w-auto container mx-auto px-4 py-8 text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#1c4c3b]">AI Image Generator</h1>
+                        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#1c4c3b]">Easy AI Image Generator</h1>
                         <p className="text-xl md:text-2xl text-[#506a3a] mb-6 max-w-3xl mx-auto">
-                            Transform your photos into multiple artistic styles with one click
+                            Create stunning AI-generated images with just one click
                         </p>
-                        <p className="text-md text-[#506a3a] mb-12 max-w-3xl mx-auto">
-                            Powered by ChatGPT | Advanced AI image generation technology for high-quality personalized art
+                        <p className="text-md text-[#506a3a] mb-4 max-w-3xl mx-auto">
+                            Powered by ChatGPT-4o | Easy to use | Free | No Login Required
+                        </p>
+                        <p className="text-sm text-[#506a3a] mb-12 max-w-3xl mx-auto">
+                            Our platform implements content safety filters and intellectual property protection measures to ensure responsible AI image generation
                         </p>
 
                         {/* 工具区域 */}
                         <div className="bg-[#e7f0dc] p-6 rounded-xl max-w-5xl mx-auto shadow-lg border border-[#89aa7b]" id="tool-section">
-                            <h2 className="text-2xl font-bold mb-6 text-[#1c4c3b]">AI Image Generator</h2>
+                            <h2 className="text-2xl font-bold mb-6 text-[#1c4c3b]">Create Your AI Masterpiece</h2>
 
                             {/* 上传图片区域 */}
                             <div className="mb-6">
@@ -1181,401 +1181,224 @@ const HomePage = () => {
 
                 {/* 示例区域 */}
                 <section id="examples" className="container mx-auto px-4 py-16">
-                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">AI Image Inspiration Gallery</h2>
+                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Get Inspired</h2>
                     <p className="text-xl text-[#506a3a] mb-10 text-center">
-                        Check out these examples and use their prompts to create your own AI images
+                        Get inspired by what others are creating with AnyImg
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-                        {inspirationExamples.map((example, index) => (
-                            <div key={index} className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition border border-[#89aa7b]">
-                                {/* Always use 2-column layout for example cards */}
-                                <div className="grid grid-cols-2 gap-2 p-3">
-                                    {/* Left side - input images or empty */}
-                                    <div className="col-span-1">
-                                        {example.originals &&
-                                            <div>
-                                                <p className="text-[#1c4c3b] font-medium mb-2 text-center">Original{example.originals.length > 1 ? 's' : ''}</p>
-                                                <div className={`grid ${example.originals.length > 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-2`}>
-                                                    {example.originals.map((original, origIndex) => (
-                                                        <div key={`orig-${origIndex}`} className="aspect-w-1 aspect-h-1">
-                                                            <img
-                                                                src={original}
-                                                                alt={`Example original ${index}-${origIndex}`}
-                                                                className="w-full h-full object-cover rounded-lg"
-                                                                onClick={() => handleImageClick(original)}
-                                                            />
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-
-                                    {/* Right side - generated image */}
-                                    <div className="col-span-1">
-                                        <p className="text-[#1c4c3b] font-medium mb-2 text-center">AI Generated</p>
-                                        <div className="flex justify-center items-center h-full">
-                                            <div className="aspect-w-1 aspect-h-1 w-full">
-                                                <img
-                                                    src={example.generated}
-                                                    alt={`Example generated ${index}`}
-                                                    className="w-full h-full object-cover rounded-lg"
-                                                    onClick={() => handleImageClick(example.generated)}
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="p-4 bg-white">
-                                    <div className="flex justify-between items-center gap-2">
-                                        {/* Show prompt for general examples, or tool message for tool-specific examples */}
-                                        {example.prompt ? (
-                                            <p className="text-sm text-[#506a3a] flex-1"><strong>Prompt:</strong> <span className="italic">{example.prompt}</span></p>
-                                        ) : (
-                                            <p className="text-sm text-[#506a3a] flex-1">Try this style with our dedicated tool</p>
-                                        )}
-
-                                        {/* Show Apply button for prompt examples, or Explore button for tool links */}
-                                        {example.toolLink ? (
-                                            <a
-                                                href={example.toolLink || "#"}
-                                                className="flex-shrink-0 p-2 bg-[#1c4c3b] text-white rounded-lg hover:bg-[#2a6854] transition flex items-center gap-1"
-                                                title="Explore this tool"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                                </svg>
-                                                <span className="text-xs">Explore</span>
-                                            </a>
-                                        ) : (
-                                            <button
-                                                className="flex-shrink-0 p-2 bg-[#e7f0dc] text-[#1c4c3b] rounded-lg hover:bg-[#d5e6c3] transition flex items-center gap-1"
-                                                onClick={() => {
-                                                    setPrompt(example.prompt || "");
-                                                    const toolSection = document.getElementById('tool-section');
-                                                    if (toolSection) {
-                                                        toolSection.scrollIntoView({ behavior: 'smooth' });
-                                                    }
-                                                }}
-                                                title="Use this prompt"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                                </svg>
-                                                <span className="text-xs">Apply</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
+                    <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-4 mb-12">
+                        {[...Array(15)].map((_, index) => (
+                            <div
+                                key={index}
+                                className="rounded-lg overflow-hidden shadow-md hover:shadow-xl transition cursor-pointer border border-[#89aa7b] break-inside-avoid mb-4 inline-block w-full"
+                                onClick={() => handleImageClick(`/examples/home/${index + 1}.webp`)}
+                            >
+                                <img
+                                    src={`/examples/home/${index + 1}.webp`}
+                                    alt={`AI generated image example ${index + 1}`}
+                                    className="w-full h-auto object-cover"
+                                />
                             </div>
                         ))}
                     </div>
                 </section>
 
-                {/* 详细使用指南部分 - MOVED HERE */}
-                <section id="how-to-use" className="container mx-auto px-4 py-16">
-                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">How to Use Our AI Image Generator</h2>
-                    <p className="text-xl text-[#506a3a] mb-10 text-center max-w-3xl mx-auto">
-                        Follow these detailed steps to create your perfect AI image with our AI image generator
+                {/* Key Features Section */}
+                <section id="key-features" className="py-16 bg-[#f8faf6] rounded-xl mb-16">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold mb-6 text-center text-[#1c4c3b]">Key Features of AnyImg</h2>
+                        <p className="text-xl text-[#506a3a] mb-12 text-center max-w-3xl mx-auto">
+                            Turn your ideas into stunning visuals—simply and smartly.
+                        </p>
+
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">⚙️</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Simplicity & Ease of Use</h3>
+                                <p className="text-[#506a3a]">
+                                    Focus on your creative ideas—no need for complex configurations or specialized AI expertise. Just input your vision via simple prompts and settings.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">✨</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">State-of-the-Art Quality</h3>
+                                <p className="text-[#506a3a]">
+                                    Powered by the advanced ChatGPT-4o engine, AnyImg delivers stunning visuals with precision and style, ensuring every image is a masterpiece.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">📝</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Advanced Text Understanding</h3>
+                                <p className="text-[#506a3a]">
+                                    Our platform boasts superior text-to-image capabilities, accurately interpreting complex prompts and overlaying text to bring your creative concepts to life.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">🛠️</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Scenario-Specific Tools</h3>
+                                <p className="text-[#506a3a]">
+                                    Access a growing suite of specialized tools tailored for various creative scenarios. Whether you need a quick image generation for social media or a specific style adjustment, our tools simplify the process.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">🛡️</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Compliance & Safety</h3>
+                                <p className="text-[#506a3a]">
+                                    We prioritize safety and compliance. AnyImg incorporates robust content moderation measures to prevent image infringement, adult content, and other compliance risks, ensuring a secure creative environment.
+                                </p>
+                            </div>
+
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] transition hover:shadow-lg">
+                                <div className="text-3xl text-[#1c4c3b] mb-4">📊</div>
+                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">User-Centric Experience</h3>
+                                <p className="text-[#506a3a]">
+                                    Enjoy automatic history tracking and seamless sharing options that keep your creative journey organized and easy to share with the world.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Impact Stats Section */}
+                <section id="impact" className="container mx-auto px-4 py-16 mb-16">
+                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Trusted by Creators</h2>
+                    <p className="text-xl text-[#506a3a] mb-10 text-center">
+                        Join the growing community of creators using AnyImg for effortless AI image generation
                     </p>
 
-                    <div className="max-w-4xl mx-auto">
-                        <div className="grid gap-8">
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <div className="flex items-start">
-                                    <div className="w-12 h-12 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                        <span className="text-xl font-bold text-[#1c4c3b]">1</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Upload Your Image to Our AI Image Generator</h3>
-                                        <p className="text-[#506a3a] mb-3">
-                                            Click on the upload area at the top of the AI image generator tool section. You can either drag and drop an image or click to browse your files.
-                                        </p>
-                                        <p className="text-[#506a3a] mb-3">
-                                            For best results with our AI image generator, choose a clear photo with good lighting where your face and body are clearly visible. Front-facing portraits work best for AI image transformations.
-                                        </p>
-                                        <p className="text-[#506a3a]">
-                                            Supported formats include JPG, PNG, and WEBP, with a maximum file size of 5MB.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                        <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] text-center">
+                            <div className="text-4xl font-bold text-[#1c4c3b] mb-2">500+</div>
+                            <p className="text-[#506a3a]">Active Users</p>
+                        </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <div className="flex items-start">
-                                    <div className="w-12 h-12 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                        <span className="text-xl font-bold text-[#1c4c3b]">2</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Enter Your Prompt for the AI Image Generator</h3>
-                                        <p className="text-[#506a3a] mb-3">
-                                            If you already know what kind of image style you want, type your description directly in the prompt box. Be as specific as possible about the style, accessories, and details you'd like in your AI image creation.
-                                        </p>
-                                        <p className="text-[#506a3a]">
-                                            Example: "Transform into a sci-fi bounty hunter image with battle-worn armor, laser rifle, and desert planet base."
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] text-center">
+                            <div className="text-4xl font-bold text-[#1c4c3b] mb-2">1.5K+</div>
+                            <p className="text-[#506a3a]">Images Generated Daily</p>
+                        </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <div className="flex items-start">
-                                    <div className="w-12 h-12 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                        <span className="text-xl font-bold text-[#1c4c3b]">3</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Get Inspiration for Your AI Image Design</h3>
-                                        <p className="text-[#506a3a] mb-3">
-                                            If you're not sure what prompt to use for our AI image generator, click the "Get Inspiration" button to browse our Inspiration Gallery. There you'll find many examples of AI image transformations with different styles and themes.
-                                        </p>
-                                        <p className="text-[#506a3a] mb-3">
-                                            When you find a style you like, simply click the "Apply" button next to the prompt. This will automatically copy the prompt to your input box and return you to the AI image generator tool section.
-                                        </p>
-                                        <p className="text-[#506a3a]">
-                                            Alternatively, you can click the "Random" button to get a randomly selected prompt from our collection of effective AI image examples.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <div className="flex items-start">
-                                    <div className="w-12 h-12 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                        <span className="text-xl font-bold text-[#1c4c3b]">4</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Customize Your AI Image Prompt</h3>
-                                        <p className="text-[#506a3a] mb-3">
-                                            Once you have a base prompt for our AI image generator (either from the gallery or your own), personalize it by modifying specific elements:
-                                        </p>
-                                        <ul className="list-disc pl-5 mb-3 space-y-2 text-[#506a3a]">
-                                            <li><strong>Name:</strong> Change any character name to your own name or a character name you prefer in your AI image creation</li>
-                                            <li><strong>Headline:</strong> Modify the title or description (e.g., "Galactic Warrior" to "Space Explorer")</li>
-                                            <li><strong>Accessories:</strong> Update the accessories to match your interests (e.g., "sword" to "magic staff") for a personalized AI image</li>
-                                            <li><strong>Style:</strong> Adjust the overall aesthetic (e.g., "modern" to "vintage 80s") for your custom AI image style</li>
-                                            <li><strong>Packaging:</strong> Specify if you want packaging details (e.g., "with display case" or "in blister pack") for your AI image generator result</li>
-                                        </ul>
-                                        <p className="text-[#506a3a]">
-                                            The more specific and personal your prompt, the more unique your AI image creation will be!
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <div className="flex items-start">
-                                    <div className="w-12 h-12 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                                        <span className="text-xl font-bold text-[#1c4c3b]">5</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Generate Your AI Image with AI</h3>
-                                        <p className="text-[#506a3a] mb-3">
-                                            Once you're satisfied with your image and prompt, click the "Generate Image" button to submit your generation task to our AI image generator.
-                                        </p>
-                                        <p className="text-[#506a3a] mb-3">
-                                            The AI image generation process typically takes a few moments. During this time, you'll see a loading indicator - please be patient and do not refresh the page while the AI image generator is working.
-                                        </p>
-                                        <p className="text-[#506a3a]">
-                                            Congratulations! Your personalized AI image creation will appear shortly. From there, you can view the before/after comparison and save your AI image masterpiece.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3] text-center">
+                            <div className="text-4xl font-bold text-[#1c4c3b] mb-2">4.9</div>
+                            <p className="text-[#506a3a]">Average User Rating</p>
                         </div>
                     </div>
                 </section>
 
-                {/* 新增 AI 行动人偶革命部分 */}
-                <section className="container mx-auto px-4 py-16 bg-[#f9fbf6]">
-                    <div className="max-w-4xl mx-auto">
-                        <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Exploring the AI Image Revolution</h2>
-                        <p className="text-xl text-[#506a3a] mb-6">
-                            The AI image trend has become incredibly popular for collectors, hobbyists, and anyone who wants to see themselves transformed into a miniature collectible masterpiece. Our advanced AI image generator uses cutting-edge technology to create stunningly detailed and personalized figures.
+                {/* Testimonials Section */}
+                <section id="testimonials" className="bg-[#f8faf6] rounded-xl py-16 mb-16">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">What Users Say About AnyImg</h2>
+                        <p className="text-xl text-[#506a3a] mb-10 text-center">
+                            Say goodbye to complex setups and the need for professional expertise—create any image with a single click. Unleash your creativity.
                         </p>
 
-                        <div className="grid md:grid-cols-2 gap-8 mb-10">
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">What Makes AI Image Special</h3>
-                                <ul className="list-disc pl-5 space-y-2 text-[#506a3a]">
-                                    <li>Hyper-realistic detailing that mimics commercial-quality AI images</li>
-                                    <li>Perfect joint articulation points characteristic of collectible figures</li>
-                                    <li>Custom packaging design that resembles authentic toy packaging</li>
-                                    <li>Personalized character design based on your specific prompts</li>
-                                    <li>Multiple style options from retro 80s to modern high-detail figures</li>
-                                </ul>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Why Use Our AI Image Maker</h3>
-                                <ul className="list-disc pl-5 space-y-2 text-[#506a3a]">
-                                    <li>Most advanced AI image technology on the market</li>
-                                    <li>Simple upload-and-generate process with fast results</li>
-                                    <li>High-resolution output perfect for social media sharing</li>
-                                    <li>Extensive prompt library for inspiration</li>
-                                    <li>Creates unique collectible-style figures that preserve your likeness</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b] mb-8">
-                            <h3 className="text-xl font-bold mb-3 text-[#1c4c3b]">Popular AI Image Styles</h3>
-                            <div className="grid md:grid-cols-3 gap-4">
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Superhero</h4>
-                                    <p className="text-sm text-[#506a3a]">Marvel/DC inspired figures with dynamic poses and vibrant costumes</p>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3]">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 bg-[#1c4c3b] rounded-full flex items-center justify-center text-white font-bold">JD</div>
+                                    <div className="ml-4">
+                                        <h4 className="font-bold text-[#1c4c3b]">John Doe</h4>
+                                        <p className="text-sm text-[#506a3a]">Digital Artist</p>
+                                    </div>
                                 </div>
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Sci-Fi</h4>
-                                    <p className="text-sm text-[#506a3a]">Space explorers, alien hunters and futuristic warriors with high-tech gear</p>
-                                </div>
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Fantasy</h4>
-                                    <p className="text-sm text-[#506a3a]">Medieval knights, wizards and mythical creatures with magical accessories</p>
-                                </div>
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Vintage</h4>
-                                    <p className="text-sm text-[#506a3a]">Retro 70s-90s style figures with authentic period-appropriate details</p>
-                                </div>
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Military</h4>
-                                    <p className="text-sm text-[#506a3a]">Tactical combat figures with realistic gear and accessories</p>
-                                </div>
-                                <div className="p-3 bg-[#e7f0dc] rounded-lg">
-                                    <h4 className="font-bold text-[#1c4c3b] mb-1">Movie Characters</h4>
-                                    <p className="text-sm text-[#506a3a]">Classic film-inspired figures with iconic costume elements</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <p className="text-center text-[#506a3a]">
-                            Our AI image generator is continuously improving with new features and styles. Try it today to see yourself transformed into a stunning collectible figure!
-                        </p>
-                    </div>
-                </section>
-
-                {/* FAQ 部分 - 增加SEO关键词 */}
-                <section id="faq" className="container mx-auto px-4 py-16">
-                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Frequently Asked Questions About AI Image</h2>
-
-                    <div className="max-w-4xl mx-auto">
-                        <div className="space-y-4">
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">What exactly is an AI image generator?</h3>
                                 <p className="text-[#506a3a]">
-                                    An AI image generator is a specialized artificial intelligence tool that transforms regular photos into images that look like commercial AI images. Our AI image maker analyzes your photo and creates a highly detailed figure complete with articulation points, accessories, and even packaging style elements typical of collectible AI images.
+                                    "AnyImg has transformed my workflow. The text understanding capabilities are incredible - I can describe exactly what I want, and the AI delivers. The quality is on par with what I'd spend hours creating manually!"
                                 </p>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">How realistic do the AI images from your AI image maker look?</h3>
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3]">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 bg-[#1c4c3b] rounded-full flex items-center justify-center text-white font-bold">SM</div>
+                                    <div className="ml-4">
+                                        <h4 className="font-bold text-[#1c4c3b]">Sarah Miller</h4>
+                                        <p className="text-sm text-[#506a3a]">Marketing Manager</p>
+                                    </div>
+                                </div>
                                 <p className="text-[#506a3a]">
-                                    Our AI image creates impressively realistic results that mimic commercial-quality AI images. The AI generates detailed textures, joint articulations, and accessories that make the figures look like they could be photographed on a store shelf. The quality depends somewhat on your original photo quality and the specificity of your prompt.
+                                    "As someone with zero technical expertise, AnyImg is a game-changer. The scenario-specific tools are perfect for our marketing needs - we can create professional visuals in seconds without any special knowledge."
                                 </p>
                             </div>
 
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">Can I create AI images based on specific toy lines with your AI image?</h3>
+                            <div className="bg-white p-8 rounded-xl shadow-md border border-[#d5e6c3]">
+                                <div className="flex items-center mb-4">
+                                    <div className="w-12 h-12 bg-[#1c4c3b] rounded-full flex items-center justify-center text-white font-bold">RL</div>
+                                    <div className="ml-4">
+                                        <h4 className="font-bold text-[#1c4c3b]">Robert Liu</h4>
+                                        <p className="text-sm text-[#506a3a]">Content Creator</p>
+                                    </div>
+                                </div>
                                 <p className="text-[#506a3a]">
-                                    Yes! Our AI image generator can create figures inspired by popular toy styles from different eras. You can specify styles like "80s GI Joe style," "modern Marvel Legends style," or "Japanese mecha style" in your prompts to guide the AI image toward a particular aesthetic. The more specific your description, the better the AI can match your desired style.
-                                </p>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">How many free credits do I get with the AI image maker?</h3>
-                                <p className="text-[#506a3a]">
-                                    New users receive 3 free credits to try our AI image generator. Each credit allows you to create one AI image. After using your free credits, you can purchase additional credits or subscribe to our premium plan for unlimited access to our AI image maker and other AI transformation tools.
-                                </p>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                                <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">Can I use the AI image images commercially?</h3>
-                                <p className="text-[#506a3a]">
-                                    Yes, all images created with our AI image maker are yours to use, including for commercial purposes. However, please be aware that if your prompts reference specific trademarked characters or brands, the resulting images may have copyright implications that you should consider before commercial use.
+                                    "The simplicity of AnyImg is brilliant. I create thumbnails and social media content daily, and knowing the system has built-in compliance measures gives me peace of mind. My favorite AI tool by far!"
                                 </p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* 创作者声明部分 */}
-                <section className="container mx-auto px-4 py-16 bg-[#f9fbf6]">
-                    <div className="max-w-4xl mx-auto text-center">
-                        <h2 className="text-3xl font-bold mb-8 text-[#1c4c3b]">Create Your Personalized AI Image Today</h2>
-                        <p className="text-xl text-[#506a3a] mb-8">
-                            Our AI image generator makes it easy to transform photos into incredible collectible-style figures. Whether you're creating a gift, a social media post, or just having fun, our AI image maker delivers high-quality results every time.
-                        </p>
-                        <button
-                            onClick={() => {
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="px-8 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition"
-                        >
-                            Start Creating Your AI Image
-                        </button>
-                    </div>
-                </section>
-
-                {/* 简化的介绍部分 */}
-                <section id="about" className="container mx-auto px-4 py-16">
-                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Explore the Unlimited Possibilities of AI Image Generation</h2>
-                    <p className="text-lg text-[#506a3a] mb-10 text-center max-w-3xl mx-auto">
-                        Easily transform your photos into various artistic styles using our advanced AI technology
+                {/* FAQ Section */}
+                <section id="faq" className="container mx-auto px-4 py-16 mb-16">
+                    <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">Frequently Asked Questions</h2>
+                    <p className="text-xl text-[#506a3a] mb-10 text-center">
+                        Have another question? Contact us at support@anyimg.cc
                     </p>
 
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div>
-                            <h3 className="text-2xl font-bold mb-4 text-[#1c4c3b]">Versatile AI Image Generator</h3>
-                            <p className="text-[#506a3a] mb-4">
-                                Our AI image generation technology can transform ordinary photos into multiple stunning artistic styles, including oil paintings, watercolors, sketches, anime, pixel art, and more.
-                            </p>
-                            <p className="text-[#506a3a] mb-4">
-                                Whether you want to create personalized avatars, social media content, or add unique visual elements to your projects, our AI can meet your needs.
-                            </p>
+                    <div className="max-w-4xl mx-auto grid gap-6">
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">What is AnyImg?</h3>
                             <p className="text-[#506a3a]">
-                                With our advanced multi-image processing capability, you can process up to 5 images at once, greatly improving your creative efficiency.
+                                AnyImg is a cutting-edge AI image generator designed to let you focus on your artistic vision. We transform your creative ideas into stunning, tailor-made visuals—no technical expertise required.
                             </p>
                         </div>
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#89aa7b]">
-                            <h3 className="text-xl font-bold mb-4 text-[#1c4c3b]">Why Choose Our AI Image Generator:</h3>
-                            <ul className="space-y-3">
-                                <li className="flex items-start">
-                                    <span className="w-5 h-5 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-3 mt-1">
-                                        <span className="w-2 h-2 bg-[#1c4c3b] rounded-full"></span>
-                                    </span>
-                                    <span className="text-[#506a3a]">ChatGPT technology support, generating high-quality, detail-rich images</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="w-5 h-5 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-3 mt-1">
-                                        <span className="w-2 h-2 bg-[#1c4c3b] rounded-full"></span>
-                                    </span>
-                                    <span className="text-[#506a3a]">Support for batch processing of up to 5 images, flexible and efficient</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="w-5 h-5 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-3 mt-1">
-                                        <span className="w-2 h-2 bg-[#1c4c3b] rounded-full"></span>
-                                    </span>
-                                    <span className="text-[#506a3a]">Rich style selection to meet different creative needs</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="w-5 h-5 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-3 mt-1">
-                                        <span className="w-2 h-2 bg-[#1c4c3b] rounded-full"></span>
-                                    </span>
-                                    <span className="text-[#506a3a]">User-friendly interface, simple and easy to use</span>
-                                </li>
-                                <li className="flex items-start">
-                                    <span className="w-5 h-5 bg-[#e7f0dc] rounded-full flex items-center justify-center mr-3 mt-1">
-                                        <span className="w-2 h-2 bg-[#1c4c3b] rounded-full"></span>
-                                    </span>
-                                    <span className="text-[#506a3a]">Privacy protection, your images are securely encrypted</span>
-                                </li>
-                            </ul>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">How does AnyImg work?</h3>
+                            <p className="text-[#506a3a]">
+                                Simply concentrate on your creative concepts and let our advanced AI, powered by ChatGPT-4o, interpret your ideas. With our intuitive platform, AnyImg effortlessly turns your artistic dreams into reality.
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">What makes AnyImg different from other AI image generators?</h3>
+                            <p className="text-[#506a3a]">
+                                Unlike many tools that overwhelm you with complex settings, AnyImg focuses on simplicity and creativity. We offer specialized, scenario-specific tools, state-of-the-art quality, and superior text understanding, all while ensuring robust safety measures to protect against potential content risks.
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">Who is AnyImg for?</h3>
+                            <p className="text-[#506a3a]">
+                                AnyImg is for everyone—from casual creators to professional artists—who want to generate high-quality images quickly and seamlessly without needing in-depth AI knowledge.
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">What safety and compliance measures are in place?</h3>
+                            <p className="text-[#506a3a]">
+                                We take content safety seriously. Our platform includes advanced content moderation to prevent image infringement, adult content, and other high-risk materials, ensuring your creative journey remains secure and fully compliant.
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">Can I share my generated images?</h3>
+                            <p className="text-[#506a3a]">
+                                Absolutely! AnyImg offers easy sharing options along with automatic history tracking, making it simple to save and showcase your creations with confidence.
+                            </p>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl shadow-md border border-[#d5e6c3]">
+                            <h3 className="text-xl font-bold mb-2 text-[#1c4c3b]">What's next for AnyImg?</h3>
+                            <p className="text-[#506a3a]">
+                                We're continuously evolving! Expect regular updates that expand our range of specialized tools and enhance the overall creative experience, all while keeping ease-of-use and compliance at the forefront.
+                            </p>
                         </div>
                     </div>
                 </section>
 
-                {/* 使用说明部分 */}
+                {/* 详细使用指南部分 - Preserved as per user request */}
                 <section id="how-to-use" className="container mx-auto px-4 py-16">
                     <h2 className="text-3xl font-bold mb-8 text-center text-[#1c4c3b]">How to Use Our AI Image Generator</h2>
                     <p className="text-xl text-[#506a3a] mb-10 text-center max-w-3xl mx-auto">
@@ -1668,8 +1491,8 @@ const HomePage = () => {
                         </div>
                     </div>
                 </section>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 };
 

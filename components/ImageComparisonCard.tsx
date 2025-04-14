@@ -364,7 +364,7 @@ const ImageComparisonCard = ({
                                 <div className="w-12 h-full bg-gradient-to-r from-transparent to-white"></div>
                                 <button
                                     onClick={() => setExpandTags(true)}
-                                    className="ml-1 text-sm text-[#506a3a] font-medium hover:text-[#89aa7b]"
+                                    className="text-sm text-[#506a3a] font-medium hover:text-[#89aa7b] bg-white"
                                 >
                                     More
                                 </button>

@@ -8,20 +8,20 @@ export default {
       layout: 'raw'
     }
   },
-  tools: {
-    type: 'menu',
-    title: 'Tools',
-    items: [
-      {
-        title: 'Ghibli Style Image Generator',
-        href: '/ghibli-style-image-generator'
-      },
-      {
-        title: 'Action Figure AI',
-        href: '/action-figure-ai'
-      }
-    ]
-  },
+  // tools: {
+  //   type: 'menu',
+  //   title: 'Tools',
+  //   items: [
+  //     {
+  //       title: 'Ghibli Style Image Generator',
+  //       href: '/ghibli-style-image-generator'
+  //     },
+  //     {
+  //       title: 'Action Figure AI',
+  //       href: '/action-figure-ai'
+  //     }
+  //   ]
+  // },
   "ghibli-style-image-generator": {
     type: 'page',
     title: 'Ghibli Style Image Generator',
@@ -54,16 +54,26 @@ export default {
       layout: 'raw'
     }
   },
-  about: {
-    type: 'page',
-    title: 'About',
-    href: '/#about'
-  },
-  // features: {
+  // about: {
   //   type: 'page',
-  //   title: 'Features',
-  //   href: '/#features'
+  //   title: 'About',
+  //   href: '/#about'
   // },
+  features: {
+    type: 'page',
+    title: 'Features',
+    href: '/#features'
+  },
+  // examples: {
+  //   type: 'page',
+  //   title: 'Examples',
+  //   href: '/#examples'
+  // },
+  faq: {
+    type: 'page',
+    title: 'FAQ',
+    href: '/#faq'
+  },
   pricing: {
     type: 'page',
     title: 'Pricing',
@@ -71,23 +81,29 @@ export default {
       layout: 'raw'
     }
   },
-  "refund-policy": {
+  "privacy-policy": {
     type: 'page',
-    title: 'Refund Policy',
-    display: 'hidden',
+    title: 'Privacy Policy',
+    // display: 'hidden',
     theme: {
       layout: 'default'
     }
   },
-  examples: {
+  "terms-of-service": {
     type: 'page',
-    title: 'Examples',
-    href: '/#examples'
+    title: 'Terms of Service',
+    // display: 'hidden',
+    theme: {
+      layout: 'default'
+    }
   },
-  faq: {
+  "refund-policy": {
     type: 'page',
-    title: 'FAQ',
-    href: '/#faq'
+    title: 'Refund Policy',
+    // display: 'hidden',
+    theme: {
+      layout: 'default'
+    }
   },
   contact: {
     type: 'page',
@@ -104,22 +120,6 @@ export default {
   //     layout: 'raw'
   //   }
   // },
-  "privacy-policy": {
-    type: 'page',
-    title: 'Privacy Policy',
-    display: 'hidden',
-    theme: {
-      layout: 'default'
-    }
-  },
-  "terms-of-service": {
-    type: 'page',
-    title: 'Terms of Service',
-    display: 'hidden',
-    theme: {
-      layout: 'default'
-    }
-  },
 
 
   // docs: {

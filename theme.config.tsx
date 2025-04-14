@@ -62,7 +62,7 @@ function Footer() {
           </p>
         </div>
 
-        <List
+        {/* <List
           title="Fun Tools"
           items={[
             { title: "Random Pokemon Generator", url: "https://randompokegen.cc" },
@@ -80,7 +80,7 @@ function Footer() {
             { title: "Curve Rush", url: "https://curve-rush.cc" },
             { title: "GameHome", url: "https://gamehome.fun" }
           ]}
-        />
+        /> */}
 
         <List
           title="About"
