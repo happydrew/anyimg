@@ -749,9 +749,9 @@ const HomePage = () => {
                 {/* 英雄区域 */}
                 <div id="hero_containter" className='w-full flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12'>
                     <section className="w-full md:max-w-auto container mx-auto px-4 py-8 text-center">
-                        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#1c4c3b]">Easy AI Image Generator</h1>
+                        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-[#1c4c3b]">Easiest AI Image Generator</h1>
                         <p className="text-xl md:text-2xl text-[#506a3a] mb-6 max-w-3xl mx-auto">
-                            Create stunning AI-generated images with just one click
+                            Create stunning AI-generated images effortlessly
                         </p>
                         <p className="text-md text-[#506a3a] mb-4 max-w-3xl mx-auto">
                             Powered by ChatGPT-4o | Easy to use | Free | No Login Required
