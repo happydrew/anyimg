@@ -68,29 +68,29 @@ const ActionFigureAI = () => {
     // 修改示例，添加title、tagline和accessories字段
     const inspirationExamples = [
         {
-            original: "/examples/action-figure/original-1.jpg",
-            actionFigure: "/examples/action-figure/action-figure-1.png",
+            original: "/examples/action-figure/original-1.webp",
+            actionFigure: "/examples/action-figure/action-figure-1.webp",
             title: "CR7 STRIKEFORCE",
             tagline: "Unstoppable on Any Field!",
             accessories: "a golden soccer ball, interchangeable cleats, a Portugal jersey, a trophy stand, and signature celebration arms"
         },
         {
-            original: "/examples/action-figure/original-2.jpg",
-            actionFigure: "/examples/action-figure/action-figure-2.png",
+            original: "/examples/action-figure/original-2.webp",
+            actionFigure: "/examples/action-figure/action-figure-2.webp",
             title: "BEZOS PRIME COMMANDER",
             tagline: "Delivering the Future!",
             accessories: "a miniature Blue Origin-style rocket, a high-tech drone, a 'Billionaire Blaster' handheld device, and a futuristic tablet"
         },
         {
-            original: "/examples/action-figure/original-3.jpg",
-            actionFigure: "/examples/action-figure/action-figure-3.png",
+            original: "/examples/action-figure/original-3.webp",
+            actionFigure: "/examples/action-figure/action-figure-3.webp",
             title: "TECHNOKING ELON",
             tagline: "One Tweet Away from Mars!",
             accessories: "a miniature Cybertruck, a Boring Company flamethrower, a Mars surface map, a Tesla battery pack, and an 'X' control panel"
         },
         {
-            original: "/examples/action-figure/original-4.jpg",
-            actionFigure: "/examples/action-figure/action-figure-4.png",
+            original: "/examples/action-figure/original-4.webp",
+            actionFigure: "/examples/action-figure/action-figure-4.webp",
             title: "GATES OF GENIUS",
             tagline: "CODE. CURE. CONQUER.",
             accessories: "a pair of iconic glasses, a vintage Windows monitor labeled 'Windows 95', a syringe representing medical research, a philanthropic donation jar, and a chalkboard reading 'How to Solve Global Warming'"
