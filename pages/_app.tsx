@@ -5,7 +5,7 @@ import Head from 'next/head';
 import '../style.css';
 import { NextUIProvider } from '@nextui-org/react';
 import { AuthProvider } from '@/contexts/AuthContext';
-
+import { FreeCreditsProvider } from '@/contexts/FreeCreditsContext';
 export default function App({ Component, pageProps }: AppProps): ReactElement {
 
   // useEffect(() => {
@@ -61,7 +61,9 @@ export default function App({ Component, pageProps }: AppProps): ReactElement {
 
     <NextUIProvider>
       <AuthProvider>
-        <Component {...pageProps} />
+        <FreeCreditsProvider>
+          <Component {...pageProps} />
+        </FreeCreditsProvider>
       </AuthProvider>
     </NextUIProvider>
   </>)

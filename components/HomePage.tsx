@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Image from 'next/image';
-import { checkFreeUsage, useOneFreeGeneration } from '@lib/usageChecker';
 // 修正导入
 import { useAuth } from '@/contexts/AuthContext';
 import UpgradeModal from '@components/UpgradeModal';
@@ -8,7 +7,9 @@ import AdModal from './AdModal';
 import ImageViewerModal from './ImageViewerModal';
 import TurnstileModal from './TurnstileModal';
 import ImageComparisonCard from './ImageComparisonCard';
-import { FREE_MAX_CREDITS } from '@/config';
+import { FreeCreditsContext } from '@/contexts/FreeCreditsContext';
+import { CHECK_STATUS_INTERVAL } from '@/config';
+
 
 // 定义历史记录类型
 interface HistoryItem {
@@ -32,8 +33,6 @@ interface Tool {
 const MAX_IMAGES = 5;
 const FREE_MAX_IMAGES = 1;
 
-const CHECK_STATUS_INTERVAL = 60000;
-
 const HomePage = () => {
     // 使用AuthContext
     const { user, credits, setIsLoginModalOpen, setLoginModalRedirectTo, getAccessToken } = useAuth();
@@ -52,7 +51,7 @@ const HomePage = () => {
     const [isResultBlurred, setIsResultBlurred] = useState(false);
     const [pendingGeneration, setPendingGeneration] = useState(false);
     const [showTurnstile, setShowTurnstile] = useState(false);
-    const [freeCredits, setFreeCredits] = useState(0);
+    const { freeCredits, useFreeCredits } = useContext(FreeCreditsContext);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
@@ -130,19 +129,6 @@ const HomePage = () => {
     useEffect(() => {
         handleRandomPrompt();
     }, [])
-
-    // 只在用户未登录时才检查免费使用次数
-    useEffect(() => {
-        if (!user) {
-            checkFreeUsage().then((freeUsage) => {
-                console.log('Free usage:', freeUsage);
-                setFreeCredits(FREE_MAX_CREDITS - freeUsage);
-            }).catch((error) => {
-                console.error('Failed to check usage:', error);
-                setFreeCredits(FREE_MAX_CREDITS);
-            });
-        }
-    }, [user]);
 
     // 加载历史记录
     useEffect(() => {
@@ -383,7 +369,9 @@ const HomePage = () => {
             });
 
             if (response.ok) {
-                useOnce(); // Deduct credit points
+                if (!user) {
+                    useFreeCredits(1);
+                }
                 const responseData = await response.json();
 
                 // Save task ID and uploaded images to localStorage
@@ -422,7 +410,15 @@ const HomePage = () => {
     const checkTaskStatus = async (taskId: string) => {
         console.log(`Checking task ${taskId} status)`);
         try {
-            const response = await fetch(`/api/generate-image/task-status?taskId=${taskId}`);
+            const accessToken = await getAccessToken();
+
+            const response = await fetch('/api/generate-image/task-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ taskId, accessToken })
+            });
 
             if (response.ok) {
                 const data = await response.json();
@@ -475,6 +471,43 @@ const HomePage = () => {
 
             if (ctx) {
                 ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // 为未登录用户添加水印
+                if (!user) {
+                    // 计算合适的字体大小 - 直接使用更大的固定值
+                    const fontSize = Math.max(24, Math.floor(img.height / 20));
+                    const fontFamily = 'Arial, sans-serif';
+
+                    // 设置水印样式 - 使用更明显的颜色和透明度
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; // 白色文字，高不透明度
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; // 黑色描边
+                    ctx.lineWidth = Math.max(2, Math.floor(fontSize / 8)); // 描边宽度与字体大小成比例
+                    ctx.font = `bold ${fontSize}px ${fontFamily}`;
+                    ctx.textBaseline = 'bottom'; // 设置文本基线
+
+                    const watermarkText = 'https://anyimg.cc';
+
+                    // 测量文本宽度
+                    const textMetrics = ctx.measureText(watermarkText);
+                    const textWidth = textMetrics.width;
+
+                    // 移除阴影效果，改用描边
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+
+                    // 在右下角绘制水印
+                    const padding = Math.max(15, Math.floor(img.width * 0.02));
+                    const x = img.width - textWidth - padding;
+                    const y = img.height - padding;
+
+                    // 先绘制描边，再填充文字
+                    ctx.strokeText(watermarkText, x, y);
+                    ctx.fillText(watermarkText, x, y);
+                    console.log('Watermark drawn at position:', x, y, 'with font size:', fontSize);
+                }
+
                 const img_base64 = canvas.toDataURL('image/jpeg');
 
                 // Set the generated image
@@ -534,6 +567,9 @@ const HomePage = () => {
         localStorage.removeItem('pendingPrompt');
         localStorage.removeItem('pendingSize');
         // Return user points
+        if (!user) {
+            useFreeCredits(-1);
+        }
     }
 
     // 停止轮询
@@ -545,17 +581,6 @@ const HomePage = () => {
         }
         setPendingGeneration(false);
     };
-
-    const useOnce = () => {
-        // Deduct points based on login status
-        if (!user) {
-            // For non-logged in users, deduct free credits
-            setFreeCredits(prev => prev - 1);
-            useOneFreeGeneration();
-        } else {
-            // For logged in users, credits are automatically deducted in the backend
-        }
-    }
 
     // 修改处理广告的函数
     const handleCloseAd = (isPreGenAd: boolean) => {
@@ -1024,7 +1049,7 @@ const HomePage = () => {
                                     <p className="ml-4 text-sm text-[#506a3a]">Remaining Free Credits: {freeCredits} &nbsp;&nbsp;
                                         <button
                                             onClick={() => {
-                                                setLoginModalRedirectTo(`${window.location.origin}/temp-purchase`)
+                                                setLoginModalRedirectTo(`${window.location.origin}/pricing`)
                                                 setIsLoginModalOpen(true); // 打开登录模态框
                                                 setIsLoginModalOpen(true); // Open login modal
                                             }}
@@ -1066,7 +1091,7 @@ const HomePage = () => {
                             </div>
                         )}
 
-                        {generatedImages.length > 0 && uploadedImages.length > 0 && !isGenerating && (
+                        {generatedImages.length > 0 && !isGenerating && (
                             <div className="max-w-5xl mx-auto">
                                 {/* 添加模糊效果覆盖层 */}
                                 {isResultBlurred && (
@@ -1084,64 +1109,16 @@ const HomePage = () => {
                                 )}
 
                                 {/* 单张图片的对比显示 */}
-                                <div className="rounded-lg overflow-hidden shadow-md border border-[#89aa7b]">
-                                    <div className="relative">
-                                        <div className="flex flex-col md:flex-row">
-                                            <div className="w-full md:w-1/2 p-2">
-                                                <div className="aspect-w-16 aspect-h-9 relative">
-                                                    <img
-                                                        src={uploadedImages[0]}
-                                                        alt="Original image"
-                                                        className="w-full h-full object-contain rounded-lg"
-                                                        onClick={() => handleImageClick(uploadedImages[0])}
-                                                    />
-                                                    <div className="absolute top-2 left-2 bg-white/80 px-2 py-1 rounded text-xs text-[#1c4c3b]">
-                                                        Original
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="w-full md:w-1/2 p-2">
-                                                <div className="aspect-w-16 aspect-h-9 relative">
-                                                    <img
-                                                        src={generatedImages[0]}
-                                                        alt="Generated image"
-                                                        className="w-full h-full object-contain rounded-lg"
-                                                        onClick={() => handleImageClick(generatedImages[0])}
-                                                    />
-                                                    <div className="absolute top-2 left-2 bg-white/80 px-2 py-1 rounded text-xs text-[#1c4c3b]">
-                                                        AI Generated
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {prompt && (
-                                        <div className="p-4 bg-white">
-                                            <p className="text-sm text-[#506a3a]"><strong>Prompt:</strong> <span className="italic">{prompt}</span></p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* 下载/分享按钮 */}
-                                <div className="flex justify-center mt-6 gap-4">
-                                    <button
-                                        className="px-4 py-2 bg-[#1c4c3b] text-white rounded-lg hover:bg-[#2a6854] flex items-center gap-2"
-                                        onClick={() => {
-                                            if (generatedImages.length > 0) {
-                                                const a = document.createElement('a');
-                                                a.href = generatedImages[0];
-                                                a.download = `anyimg-generation-${Date.now()}.png`;
-                                                document.body.appendChild(a);
-                                                a.click();
-                                                document.body.removeChild(a);
-                                            }
-                                        }}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                        Download Image
-                                    </button>
+                                <div className="relative">
+                                    <ImageComparisonCard
+                                        id={`history-image-comparison-card  `}
+                                        data-type="history-image-comparison-card"
+                                        original={uploadedImages[0]}
+                                        generate={generatedImages[0]}
+                                        tags={[
+                                            ['Prompt', prompt]
+                                        ]}
+                                    />
                                 </div>
                             </div>
                         )}

@@ -31,10 +31,9 @@ export async function hasEnoughCredits(userId: string, requiredCredits: number):
  * 扣除用户点数
  * @param userId 用户ID
  * @param amount 扣除的点数
- * @param description 扣除原因
  * @returns 是否扣除成功
  */
-export async function deductCredits(userId: string, amount: number, description: string): Promise<boolean> {
+export async function deductCredits(userId: string, amount: number): Promise<boolean> {
     try {
         const { data: deducted, error: deductError } = await supabaseAdmin.rpc(
             'deduct_user_credits',

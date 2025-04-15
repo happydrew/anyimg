@@ -1,12 +1,12 @@
 import { getVisitorId } from './fingerprint';
-import { getUsageCount, incrementUsage } from './hybridStorage';
+import { getUsageCount, addUsage } from './hybridStorage';
 
 export async function checkFreeUsage(): Promise<number> {
     const id = await getVisitorId();
     return await getUsageCount(id);
 }
 
-export async function useOneFreeGeneration() {
+export async function addFreeUsage(credits: number) {
     const id = await getVisitorId();
-    await incrementUsage(id);
+    await addUsage(id, credits);
 }

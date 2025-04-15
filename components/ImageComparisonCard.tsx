@@ -348,7 +348,7 @@ const ImageComparisonCard = ({
                             />
                         </div>
                         <div className="p-2 text-center bg-[#f5f9ee]">
-                            <p className="text-[#506a3a] font-medium">Stylized</p>
+                            <p className="text-[#506a3a] font-medium">Stylized <span className="text-xs">(buy credits to remove watermark)</span></p>
                         </div>
                     </div>
                 </div>

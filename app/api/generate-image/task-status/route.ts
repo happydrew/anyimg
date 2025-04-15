@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { supabaseAdmin } from '@lib/supabase_service';
+import { deductCredits } from '@lib/credits_service';
 
 // export const runtime = "edge";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
 
     try {
         // 获取客户端IP
@@ -10,11 +12,11 @@ export async function GET(request: NextRequest) {
         const clientIp = forwardedFor ? forwardedFor.split(',')[0] : 'unknown';
         console.log(`request ip: ${clientIp}`);
 
-        // 从URL参数获取taskId
-        const url = new URL(request.url);
-        const taskId = url.searchParams.get('taskId');
+        // 从请求体获取taskId，accessToken
+        const requestData = await request.json();
+        console.log(`request data: ${JSON.stringify(requestData)}`);
 
-        console.log(`taskId: ${taskId}`);
+        const { taskId, accessToken } = requestData;
 
         if (!taskId) {
             return NextResponse.json(
@@ -22,6 +24,34 @@ export async function GET(request: NextRequest) {
                 { status: 400 }
             );
         }
+
+        // 如果生成失败，返还用户点数，返回错误信息
+        // if (accessToken) {
+        //     // 验证 token 并获取用户ID
+        //     const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken);
+
+        //     if (error || !user) {
+        //         return NextResponse.json(
+        //             { error: 'Invalid access token' },
+        //             { status: 401 }
+        //         );
+        //     }
+
+        //     console.log(`User ${user.id} logged in`);
+
+        //     const deducted = await deductCredits(user.id, -1);
+        //     if (!deducted) {
+        //         console.error(`Failed to deduct credit for user ${user.id}`);
+        //         // 继续返回任务信息，但记录错误
+        //     }
+        // }
+
+        // return NextResponse.json({
+        //     success: false,
+        //     status: 'FAILED',
+        //     message: 'Failed to check task status'
+        // });
+
 
         // 获取Kie.ai API密钥
         const apiKey = process.env.KIE_API_KEY;
@@ -75,7 +105,27 @@ export async function GET(request: NextRequest) {
                 message: 'Generating, please check later'
             });
         } else {
-            // 如果生成失败，返回错误信息
+            // 如果生成失败，返还用户点数，返回错误信息
+            if (accessToken) {
+                // 验证 token 并获取用户ID
+                const { data: { user }, error } = await supabaseAdmin.auth.getUser(accessToken);
+
+                if (error || !user) {
+                    return NextResponse.json(
+                        { error: 'Invalid access token' },
+                        { status: 401 }
+                    );
+                }
+
+                console.log(`User ${user.id} logged in`);
+
+                const deducted = await deductCredits(user.id, -1);
+                if (!deducted) {
+                    console.error(`Failed to deduct credit for user ${user.id}`);
+                    // 继续返回任务信息，但记录错误
+                }
+            }
+
             return NextResponse.json({
                 success: false,
                 status: 'FAILED',

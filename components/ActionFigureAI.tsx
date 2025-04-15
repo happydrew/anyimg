@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Image from 'next/image';
-import { checkFreeUsage, useOneFreeGeneration } from '@lib/usageChecker';
 // 修正导入
 import { useAuth } from '@/contexts/AuthContext';
 import UpgradeModal from '@components/UpgradeModal';
@@ -8,7 +7,9 @@ import AdModal from './AdModal';
 import ImageViewerModal from './ImageViewerModal';
 import TurnstileModal from './TurnstileModal';
 import ImageComparisonCard from './ImageComparisonCard';
-import { FREE_MAX_CREDITS } from '@/config';
+import { FreeCreditsContext } from '@/contexts/FreeCreditsContext';
+import { CHECK_STATUS_INTERVAL } from '@/config';
+
 
 // 定义历史记录类型
 interface HistoryItem {
@@ -19,8 +20,6 @@ interface HistoryItem {
     accessories?: string;
 }
 
-
-const CHECK_STATUS_INTERVAL = 60000;
 
 // 保留waitingTips相关代码作为常量
 const waitingTips = [
@@ -55,7 +54,7 @@ const ActionFigureAI = () => {
     const [isResultBlurred, setIsResultBlurred] = useState(false);
     const [pendingGeneration, setPendingGeneration] = useState(false);
     const [showTurnstile, setShowTurnstile] = useState(false);
-    const [freeCredits, setFreeCredits] = useState(0);
+    const { freeCredits, useFreeCredits } = useContext(FreeCreditsContext);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
 
@@ -139,19 +138,6 @@ following authentic retail action figure design.`
     useEffect(() => {
         handleRandomInputs();
     }, [])
-
-    // 只在用户未登录时才检查免费使用次数
-    useEffect(() => {
-        if (!user) {
-            checkFreeUsage().then((freeUsage) => {
-                console.log('Free usage:', freeUsage);
-                setFreeCredits(FREE_MAX_CREDITS - freeUsage);
-            }).catch((error) => {
-                console.error('Failed to check usage:', error);
-                setFreeCredits(FREE_MAX_CREDITS);
-            });
-        }
-    }, [user]);
 
     // 加载历史记录
     useEffect(() => {
@@ -391,7 +377,9 @@ following authentic retail action figure design.`
             });
 
             if (response.ok) {
-                useOnce(); // 扣除积分点数
+                if (!user) {
+                    useFreeCredits(1);
+                }
                 const responseData = await response.json();
 
                 // 保存任务ID和上传图片到localStorage
@@ -431,7 +419,14 @@ following authentic retail action figure design.`
     const checkTaskStatus = async (taskId: string) => {
         console.log(`Checking task ${taskId} status)`);
         try {
-            const response = await fetch(`/api/generate-image/task-status?taskId=${taskId}`);
+            const accessToken = await getAccessToken();
+            const response = await fetch('/api/generate-image/task-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ taskId, accessToken })
+            });
 
             if (response.ok) {
                 const data = await response.json();
@@ -479,6 +474,43 @@ following authentic retail action figure design.`
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                // 为未登录用户添加水印
+                if (!user) {
+                    // 计算合适的字体大小 - 直接使用更大的固定值
+                    const fontSize = Math.max(24, Math.floor(img.height / 20));
+                    const fontFamily = 'Arial, sans-serif';
+
+                    // 设置水印样式 - 使用更明显的颜色和透明度
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; // 白色文字，高不透明度
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; // 黑色描边
+                    ctx.lineWidth = Math.max(2, Math.floor(fontSize / 8)); // 描边宽度与字体大小成比例
+                    ctx.font = `bold ${fontSize}px ${fontFamily}`;
+                    ctx.textBaseline = 'bottom'; // 设置文本基线
+
+                    const watermarkText = 'https://anyimg.cc';
+
+                    // 测量文本宽度
+                    const textMetrics = ctx.measureText(watermarkText);
+                    const textWidth = textMetrics.width;
+
+                    // 移除阴影效果，改用描边
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 0;
+
+                    // 在右下角绘制水印
+                    const padding = Math.max(15, Math.floor(img.width * 0.02));
+                    const x = img.width - textWidth - padding;
+                    const y = img.height - padding;
+
+                    // 先绘制描边，再填充文字
+                    ctx.strokeText(watermarkText, x, y);
+                    ctx.fillText(watermarkText, x, y);
+                    console.log('Watermark drawn at position:', x, y, 'with font size:', fontSize);
+                }
+
                 const img_base64 = canvas.toDataURL('image/jpeg');
                 setGeneratedImage(img_base64);
 
@@ -527,7 +559,10 @@ following authentic retail action figure design.`
         localStorage.removeItem('pendingTitle');
         localStorage.removeItem('pendingTagline');
         localStorage.removeItem('pendingAccessories');
-        // 返还用户点数
+        // 返还免费点数
+        if (!user) {
+            useFreeCredits(-1);
+        }
     }
 
     // 停止轮询
@@ -539,17 +574,6 @@ following authentic retail action figure design.`
         }
         setPendingGeneration(false);
     };
-
-    const useOnce = () => {
-        // 根据登录状态决定扣减哪个系统的点数
-        if (!user) {
-            // 未登录用户，扣减免费点数
-            setFreeCredits(prev => prev - 1);
-            useOneFreeGeneration();
-        } else {
-            // 已登录用户在后台自动扣除积分
-        }
-    }
 
     // 修改处理广告的函数
     const handleCloseAd = (isPreGenAd: boolean) => {
@@ -812,7 +836,7 @@ following authentic retail action figure design.`
                                         <button
                                             onClick={() => {
                                                 console.log(`clicking  Add Credits button, current window.location.origin is: ${window.location.origin}`);
-                                                setLoginModalRedirectTo(`${window.location.origin}/temp-purchase`)
+                                                setLoginModalRedirectTo(`${window.location.origin}/pricing`)
                                                 setIsLoginModalOpen(true); // 打开登录模态框
                                             }}
                                             className="text-[#1c4c3b] font-medium underline"
@@ -855,7 +879,7 @@ following authentic retail action figure design.`
                             </div>
                         )}
 
-                        {generatedImage && uploadedImages.length > 0 && !isGenerating && (
+                        {generatedImage && !isGenerating && (
                             <div className="max-w-4xl mx-auto relative">
                                 {/* 添加模糊效果覆盖层 */}
                                 {isResultBlurred && (

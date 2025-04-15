@@ -31,9 +31,9 @@ export async function getUsageCount(id: string): Promise<number> {
     return fromLS ? parseInt(fromLS) : 0;
 }
 
-export async function incrementUsage(id: string): Promise<number> {
+export async function addUsage(id: string, credits: number): Promise<number> {
     const current = await getUsageCount(id);
-    const next = current + 1;
+    const next = current + credits;
 
     try {
         const db = await initDB();

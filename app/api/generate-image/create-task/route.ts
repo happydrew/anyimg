@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
         // return NextResponse.json({
         //     success: true,
-        //     taskId: 'b6122a5fa6a347f90c1312dd19eb6da7',
+        //     taskId: 'b734a5d1280f8f19600def83cc861bec',
         //     status: 'GENERATING',
         //     message: 'Generation task created successfully'
         // }, { status: 200 });
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
         // 如果是登录用户，此时先扣除积分
         // 注意：实际应用中可能需要在任务成功后才扣除积分
         if (userId) {
-            const deducted = await deductCredits(userId, 1, 'Generated ghibli style image');
+            const deducted = await deductCredits(userId, 1);
             if (!deducted) {
                 console.error(`Failed to deduct credit for user ${userId}`);
                 // 继续返回任务信息，但记录错误

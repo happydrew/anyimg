@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Image from 'next/image';
-import { checkFreeUsage, useOneFreeGeneration } from '@lib/usageChecker';
+import { checkFreeUsage, addFreeUsage } from '@lib/usageChecker';
 // 修正导入
 import { useAuth } from '@/contexts/AuthContext';
 import UpgradeModal from '@components/UpgradeModal';
-import AdModal from './AdModal';
 import ImageViewerModal from './ImageViewerModal';
 import TurnstileModal from './TurnstileModal';
 import ImageComparisonCard from './ImageComparisonCard';
-import { FREE_MAX_CREDITS } from '@/config';
+import { FreeCreditsContext } from '@/contexts/FreeCreditsContext';
+import { CHECK_STATUS_INTERVAL } from '@/config';
 
 // 定义历史记录类型
 interface HistoryItem {
@@ -22,7 +22,6 @@ interface HistoryItem {
 const MAX_IMAGES = 1;
 const FREE_MAX_IMAGES = 1;
 
-const CHECK_STATUS_INTERVAL = 60000;
 
 const HomePage = () => {
     // 使用AuthContext
@@ -43,7 +42,7 @@ const HomePage = () => {
     const [isResultBlurred, setIsResultBlurred] = useState(false);
     const [pendingGeneration, setPendingGeneration] = useState(false);
     const [showTurnstile, setShowTurnstile] = useState(false);
-    const [freeCredits, setFreeCredits] = useState(0);
+    const { freeCredits, useFreeCredits } = useContext(FreeCreditsContext);
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [imageUploading, setImageUploading] = useState(false);
     const [selectedSize, setSelectedSize] = useState('1:1');
@@ -61,19 +60,6 @@ const HomePage = () => {
 
     const [currentTipIndex, setCurrentTipIndex] = useState(0);
     const tipIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    // 只在用户未登录时才检查免费使用次数
-    useEffect(() => {
-        if (!user) {
-            checkFreeUsage().then((freeUsage) => {
-                console.log('Free usage:', freeUsage);
-                setFreeCredits(FREE_MAX_CREDITS - freeUsage);
-            }).catch((error) => {
-                console.error('Failed to check usage:', error);
-                setFreeCredits(FREE_MAX_CREDITS);
-            });
-        }
-    }, [user]);
 
     // 加载历史记录
     useEffect(() => {
@@ -283,7 +269,11 @@ const HomePage = () => {
             });
 
             if (response.ok) {
-                useOnce(); // Deduct credit points
+                // 未登录用户，使用一次免费点数
+                if (!user) {
+                    useFreeCredits(1);
+                }
+
                 const responseData = await response.json();
 
                 // Save task ID and uploaded images to localStorage
@@ -321,7 +311,15 @@ const HomePage = () => {
     const checkTaskStatus = async (taskId: string) => {
         console.log(`Checking task ${taskId} status)`);
         try {
-            const response = await fetch(`/api/generate-image/task-status?taskId=${taskId}`);
+            const accessToken = await getAccessToken();
+
+            const response = await fetch('/api/generate-image/task-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ taskId, accessToken })
+            });
 
             if (response.ok) {
                 const data = await response.json();
@@ -356,36 +354,99 @@ const HomePage = () => {
             return;
         }
 
+        // 添加调试日志
+        console.log('Processing generated image:', imageUrl);
+
         // Create image element to process the image
         const img = document.createElement('img');
-        img.crossOrigin = 'anonymous';
+        img.crossOrigin = 'anonymous'; // 确保正确设置跨域属性
+
+        // 添加错误处理
+        img.onerror = (err) => {
+            console.error('Error loading image:', err);
+            taskFailed('Error loading generated image');
+        };
+
         img.onload = () => {
+            console.log('Image loaded successfully:', img.width, 'x', img.height);
+
             const canvas = document.createElement('canvas');
             canvas.width = img.width;
             canvas.height = img.height;
+
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.drawImage(img, 0, 0, img.width, img.height);
-                const img_base64 = canvas.toDataURL('image/jpeg');
-                setGeneratedImage(img_base64);
-
-                // Get the current uploaded images and size
-                let currentUploadedImages: string[] = [];
                 try {
-                    const savedImages = localStorage.getItem('pendingUploadedImages');
-                    if (savedImages) {
-                        currentUploadedImages = JSON.parse(savedImages);
-                    } else {
+                    // 绘制原始图像
+                    ctx.drawImage(img, 0, 0, img.width, img.height);
+                    console.log('Original image drawn to canvas');
+
+                    // 为未登录用户添加水印
+                    if (!user) {
+                        // 计算合适的字体大小 - 直接使用更大的固定值
+                        const fontSize = Math.max(24, Math.floor(img.height / 20));
+                        const fontFamily = 'Arial, sans-serif';
+
+                        // 设置水印样式 - 使用更明显的颜色和透明度
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'; // 白色文字，高不透明度
+                        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)'; // 黑色描边
+                        ctx.lineWidth = Math.max(2, Math.floor(fontSize / 8)); // 描边宽度与字体大小成比例
+                        ctx.font = `bold ${fontSize}px ${fontFamily}`;
+                        ctx.textBaseline = 'bottom'; // 设置文本基线
+
+                        const watermarkText = 'https://anyimg.cc';
+
+                        // 测量文本宽度
+                        const textMetrics = ctx.measureText(watermarkText);
+                        const textWidth = textMetrics.width;
+
+                        // 移除阴影效果，改用描边
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+
+                        // 在右下角绘制水印
+                        const padding = Math.max(15, Math.floor(img.width * 0.02));
+                        const x = img.width - textWidth - padding;
+                        const y = img.height - padding;
+
+                        // 先绘制描边，再填充文字
+                        ctx.strokeText(watermarkText, x, y);
+                        ctx.fillText(watermarkText, x, y);
+                        console.log('Watermark drawn at position:', x, y, 'with font size:', fontSize);
+                    }
+
+                    // 转换为base64并设置状态
+                    const img_base64 = canvas.toDataURL('image/jpeg', 0.95);
+                    console.log('Canvas converted to base64 image');
+                    setGeneratedImage(img_base64);
+
+                    // Get the current uploaded images and size
+                    let currentUploadedImages: string[] = [];
+                    try {
+                        const savedImages = localStorage.getItem('pendingUploadedImages');
+                        if (savedImages) {
+                            currentUploadedImages = JSON.parse(savedImages);
+                        } else {
+                            currentUploadedImages = uploadedImages;
+                        }
+                    } catch (e) {
+                        console.error('Error parsing saved uploaded images:', e);
                         currentUploadedImages = uploadedImages;
                     }
-                } catch (e) {
-                    console.error('Error parsing saved uploaded images:', e);
-                    currentUploadedImages = uploadedImages;
-                }
 
-                console.log(`Check status success, using images: ${currentUploadedImages.length} images`);
-                addToHistory(currentUploadedImages, img_base64);
+                    console.log(`Check status success, using images: ${currentUploadedImages.length} images`);
+                    addToHistory(currentUploadedImages, img_base64);
+                } catch (error) {
+                    console.error('Error processing canvas:', error);
+                }
+            } else {
+                console.error('Could not get canvas context');
+                taskFailed('Failed to process image');
             }
+
+            // 清理资源
             canvas.remove();
             img.remove();
 
@@ -396,6 +457,9 @@ const HomePage = () => {
             localStorage.removeItem('pendingUploadedImages');
             localStorage.removeItem('pendingSize');
         };
+
+        // 设置图像源
+        console.log('Setting image source:', imageUrl);
         img.src = imageUrl;
     };
 
@@ -408,7 +472,12 @@ const HomePage = () => {
         localStorage.removeItem('pendingUploadedImages');
         localStorage.removeItem('pendingSize');
         // Return user points
+        if (!user) {
+            useFreeCredits(-1);
+        }
     };
+
+
 
     // 停止轮询
     const stopPolling = () => {
@@ -418,17 +487,6 @@ const HomePage = () => {
             pollingIntervalRef.current = null;
         }
         setPendingGeneration(false);
-    };
-
-    const useOnce = () => {
-        // 根据登录状态决定扣减哪个系统的点数
-        if (!user) {
-            // 未登录用户，扣减免费点数
-            setFreeCredits(prev => prev - 1);
-            useOneFreeGeneration();
-        } else {
-            // 已登录用户在后台自动扣除积分
-        }
     };
 
     // 修改处理广告的函数
@@ -755,12 +813,7 @@ const HomePage = () => {
                                 <button
                                     className={`w-auto px-6 py-3 bg-[#1c4c3b] text-white text-lg rounded-lg hover:bg-[#2a6854] transition ${isGenerating || uploadedImages.length === 0 || pendingGeneration ? 'opacity-50 cursor-not-allowed' : ''
                                         }`}
-                                    onClick={() => {
-                                        if (!isGenerating && uploadedImages.length > 0 && !pendingGeneration) {
-                                            setPendingGeneration(true);
-                                            setShowTurnstile(true);
-                                        }
-                                    }}
+                                    onClick={handleGenerateClick}
                                     disabled={isGenerating || uploadedImages.length === 0 || pendingGeneration}
                                 >
                                     {isGenerating ? 'Generating Ghibli Art...' : pendingGeneration ? 'Verifying...' : 'Create Ghibli Style Image'}
@@ -772,7 +825,7 @@ const HomePage = () => {
                                         <button
                                             onClick={() => {
                                                 console.log(`clicking  Add Credits button, current window.location.origin is: ${window.location.origin}`);
-                                                setLoginModalRedirectTo(`${window.location.origin}/temp-purchase`)
+                                                setLoginModalRedirectTo(`${window.location.origin}/pricing`)
                                                 setIsLoginModalOpen(true); // 打开登录模态框
                                             }}
                                             className="text-[#1c4c3b] font-medium underline"
@@ -817,7 +870,7 @@ const HomePage = () => {
                             </div>
                         )}
 
-                        {generatedImage && uploadedImages.length > 0 && !isGenerating && (
+                        {generatedImage && !isGenerating && (
                             <div className="max-w-4xl mx-auto relative">
                                 {/* 添加模糊效果覆盖层 */}
                                 {isResultBlurred && (

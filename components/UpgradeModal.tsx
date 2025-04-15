@@ -33,20 +33,16 @@ const UpgradeModal = ({ onClose }: { onClose: () => void }) => {
 
                 <p className="text-[#506a3a] mb-2">
                     {user
-                        ? "You don't have sufficient credits to generate more images. Please upgrade your plan to continue creating stunning Ghibli style images."
-                        : "You've used all your free image generations. Please log in and upgrade to a premium plan to continue creating amazing Ghibli style images."
+                        ? "You don't have sufficient credits to generate more images. Please purchase credits to continue creating stunning Ghibli style images."
+                        : "You've used all your free image generations. Please log in and purchase credits to continue creating amazing Ghibli style images."
                     }
-                </p>
-
-                <p className="text-[#1c4c3b] font-medium mb-6">
-                    Premium plans start at just $1!
                 </p>
 
                 <div className="flex flex-col w-full space-y-3">
                     {user ? (
                         <button
                             onClick={() => {
-                                window.location.href = '/temp-purchase';
+                                window.location.href = '/pricing';
                                 onClose();
                             }}
                             className="px-4 py-3 bg-[#1c4c3b] text-white rounded-lg hover:bg-[#2a6854] transition w-full flex items-center justify-center"

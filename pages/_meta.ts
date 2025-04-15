@@ -112,7 +112,7 @@ export default {
       layout: 'raw'
     }
   },
-  // "temp-purchase": {
+  // "pricing": {
   //   type: 'page',
   //   title: 'Temp Purchase',
   //   display: 'hidden',
